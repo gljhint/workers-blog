@@ -5,7 +5,7 @@ import { getRepliesByCommentId, findCommentById } from '@/models/CommentModel';
 // GET /api/admin/comments/[id]/replies - 获取评论的所有回复
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -16,7 +16,8 @@ export async function GET(
       }, { status: 401 });
     }
 
-    const commentId = parseInt(params.id);
+    const { id } = await params;
+    const commentId = parseInt(id);
     if (isNaN(commentId)) {
       return NextResponse.json({ 
         success: false, 
