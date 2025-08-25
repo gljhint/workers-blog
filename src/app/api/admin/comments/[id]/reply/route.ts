@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/middleware/auth';
 import { createCommentReply, findCommentById, CreateReplyData } from '@/models/CommentModel';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // POST /api/admin/comments/[id]/reply - 回复评论
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const tokenVerification = await verifyToken(request);
     if (!tokenVerification.valid || !tokenVerification.admin) {
@@ -19,7 +16,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }, { status: 401 });
     }
 
-    const commentId = parseInt(params.id);
+    const { id } = await params;
+    const commentId = parseInt(id);
     if (isNaN(commentId)) {
       return NextResponse.json({ 
         success: false, 
@@ -36,7 +34,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }, { status: 404 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as CreateReplyData;
     const {
       author_name,
       author_email,
