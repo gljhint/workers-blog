@@ -20,7 +20,16 @@ export class CategoryController extends BaseController {
    */
   async getAllCategories(): Promise<{ success: boolean; data?: Category[]; error?: string }> {
     return await this.handleAsync(
-      () => getCategoriesWithPostCount(),
+      async () => {
+        const categories = await getCategoriesWithPostCount();
+        return categories.map(cat => ({
+          ...cat,
+          description: cat.description || undefined,
+          post_count: cat.post_count || 0,
+          created_at: cat.created_at || new Date().toISOString(),
+          updated_at: cat.updated_at || new Date().toISOString()
+        })) as Category[];
+      },
       '获取分类列表失败'
     );
   }
@@ -34,7 +43,13 @@ export class CategoryController extends BaseController {
       if (!category) {
         throw new Error('分类不存在');
       }
-      return category;
+      return {
+        ...category,
+        description: category.description || undefined,
+        post_count: category.post_count || 0,
+        created_at: category.created_at || new Date().toISOString(),
+        updated_at: category.updated_at || new Date().toISOString()
+      } as Category;
     }, '获取分类失败');
   }
 
@@ -61,10 +76,11 @@ export class CategoryController extends BaseController {
         throw new Error('颜色格式无效');
       }
 
-      return await createCategory({
+      const result = await createCategory({
         name: sanitizedData.name,
         description: sanitizedData.description
       });
+      return result as Category;
     }, '创建分类失败');
   }
 
@@ -108,7 +124,8 @@ export class CategoryController extends BaseController {
         updateData.color = sanitizedData.color;
       }
 
-      return await updateCategoryData(id, updateData);
+      const result = await updateCategoryData(id, updateData);
+      return result as Category;
     }, '更新分类失败');
   }
 
@@ -147,7 +164,13 @@ export class CategoryController extends BaseController {
       if (!category) {
         throw new Error('分类不存在');
       }
-      return category;
+      return {
+        ...category,
+        description: category.description || undefined,
+        post_count: category.post_count || 0,
+        created_at: category.created_at || new Date().toISOString(),
+        updated_at: category.updated_at || new Date().toISOString()
+      } as Category;
     }, '获取分类失败');
   }
 

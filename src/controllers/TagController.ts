@@ -21,7 +21,16 @@ export class TagController extends BaseController {
    */
   async getAllTags(): Promise<{ success: boolean; data?: Tag[]; error?: string }> {
     return await this.handleAsync(
-      () => getAllTags(),
+      async () => {
+        const tags = await getAllTags();
+        return tags.map(tag => ({
+          ...tag,
+          description: tag.description || undefined,
+          post_count: tag.post_count || 0,
+          created_at: tag.created_at || new Date().toISOString(),
+          updated_at: tag.updated_at || new Date().toISOString()
+        })) as Tag[];
+      }, 
       '获取标签列表失败'
     );
   }
@@ -32,7 +41,13 @@ export class TagController extends BaseController {
   async getActiveTags(): Promise<{ success: boolean; data?: Tag[]; error?: string }> {
     return await this.handleAsync(async () => {
       const allTags = await getAllTags();
-      return allTags.filter(tag => (tag.post_count || 0) > 0);
+      return allTags.filter(tag => (tag.post_count || 0) > 0).map(tag => ({
+        ...tag,
+        description: tag.description || undefined,
+        post_count: tag.post_count || 0,
+        created_at: tag.created_at || new Date().toISOString(),
+        updated_at: tag.updated_at || new Date().toISOString()
+      })) as Tag[];
     }, '获取标签列表失败');
   }
 
@@ -45,7 +60,13 @@ export class TagController extends BaseController {
       if (!tag) {
         throw new Error('标签不存在');
       }
-      return tag;
+      return {
+        ...tag,
+        description: tag.description || undefined,
+        post_count: tag.post_count || 0,
+        created_at: tag.created_at || new Date().toISOString(),
+        updated_at: tag.updated_at || new Date().toISOString()
+      } as Tag;
     }, '获取标签失败');
   }
 
@@ -66,9 +87,10 @@ export class TagController extends BaseController {
       // 清理输入数据
       const sanitizedData = this.sanitizeInput(data);
 
-      return await createTag({
+      const result = await createTag({
         name: sanitizedData.name
       });
+      return result as Tag;
     }, '创建标签失败');
   }
 
@@ -107,7 +129,8 @@ export class TagController extends BaseController {
         updateData.description = sanitizedData.description || null;
       }
 
-      return await updateTagData(id, updateData);
+      const result = await updateTagData(id, updateData);
+      return result as Tag;
     }, '更新标签失败');
   }
 
@@ -143,7 +166,13 @@ export class TagController extends BaseController {
       if (!tag) {
         throw new Error('标签不存在');
       }
-      return tag;
+      return {
+        ...tag,
+        description: tag.description || undefined,
+        post_count: tag.post_count || 0,
+        created_at: tag.created_at || new Date().toISOString(),
+        updated_at: tag.updated_at || new Date().toISOString()
+      } as Tag;
     }, '获取标签失败');
   }
 
@@ -157,7 +186,13 @@ export class TagController extends BaseController {
       for (const name of tagNames) {
         if (name.trim()) {
           const tag = await findOrCreateTagByName(name.trim());
-          if (tag) tags.push(tag);
+          if (tag) tags.push({
+            ...tag,
+            description: tag.description || undefined,
+            post_count: tag.post_count || 0,
+            created_at: tag.created_at || new Date().toISOString(),
+            updated_at: tag.updated_at || new Date().toISOString()
+          } as Tag);
         }
       }
       

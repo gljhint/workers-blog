@@ -427,9 +427,6 @@ export default function Menubar({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
-
-
   </>
   );
 }

@@ -9,7 +9,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const categoryColor = post.category ? generateCategoryColor(post.category.id) : null;
+  const categoryColor = post.category ? generateCategoryColor(post.category.id) : undefined;
   return (
     <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       {post.cover_image && (
@@ -76,7 +76,7 @@ export default function PostCard({ post }: PostCardProps) {
         )}
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {post.tags.map((tag) => (
+          {post.tags?.map((tag) => (
             <Link
               key={tag.id}
               href={`/tags/${tag.slug}`}

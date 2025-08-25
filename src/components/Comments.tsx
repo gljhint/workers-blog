@@ -45,7 +45,7 @@ export default function Comments({ postId, enabled }: CommentsProps) {
     setLoading(true);
     try {
       const response = await fetch(`/api/comments/${postId}`);
-      const result = await response.json();
+      const result = await response.json() as { success: boolean, data: Comment[] };
       
       if (result.success) {
         setComments(result.data);
@@ -98,7 +98,7 @@ export default function Comments({ postId, enabled }: CommentsProps) {
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json() as { success: boolean, message: string, error: string };
 
       if (result.success) {
         setMessage(result.message || '评论提交成功，等待审核');
