@@ -1,0 +1,344 @@
+/* Basic editor styles */
+.tiptap {
+  outline: none;
+  max-width: 100%;
+  min-height: 400px;
+  padding: 0.5rem 1rem;
+  background: var(--background);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+
+.tiptap:focus {
+  /* Remove focus border */
+}
+
+.tiptap :first-child {
+  margin-top: 0;
+}
+
+/* Typography */
+.tiptap {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+/* List styles */
+.tiptap ul,
+.tiptap ol {
+  padding: 0 1.25rem;
+  margin: 1.25rem 0;
+  color: var(--foreground);
+}
+
+.tiptap ul {
+  list-style-type: disc;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+}
+
+.tiptap ul ul,
+.tiptap ol ul {
+  list-style-type: circle;
+}
+
+.tiptap ul ul ul,
+.tiptap ol ul ul {
+  list-style-type: square;
+}
+
+.tiptap ol ol,
+.tiptap ul ol {
+  list-style-type: lower-alpha;
+}
+
+.tiptap ol ol ol,
+.tiptap ul ol ol {
+  list-style-type: lower-roman;
+}
+
+.tiptap ul li,
+.tiptap ol li {
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+}
+
+.tiptap ul li p,
+.tiptap ol li p {
+  margin: 0.25rem 0;
+}
+
+/* Task list styles */
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.tiptap ul[data-type="taskList"] li > label > input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  background: var(--background);
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.tiptap ul[data-type="taskList"] li > label > input[type="checkbox"]:checked {
+  background-color: var(--primary);
+}
+
+/* Heading styles */
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  line-height: 1.2;
+  margin: 1rem 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--foreground);
+}
+
+.tiptap h1 {
+  font-size: 1.5rem;
+}
+
+.tiptap h2 {
+  font-size: 1.25rem;
+}
+
+.tiptap h3 {
+  font-size: 1.125rem;
+}
+
+.tiptap h4 {
+  font-size: 1rem;
+}
+
+.tiptap h5,
+.tiptap h6 {
+  font-size: 0.875rem;
+}
+
+/* Code block styles */
+.tiptap pre {
+  background: var(--muted);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 0;
+}
+
+.tiptap code {
+  background-color: var(--muted);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.2em 0.4em;
+}
+
+/* Blockquote styles */
+.tiptap blockquote {
+  border-left: 4px solid #3b82f6;
+  margin: 2rem 0;
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  color: #6b7280;
+  background: #f9fafb;
+  border-radius: 0 8px 8px 0;
+  position: relative;
+}
+
+.tiptap blockquote p {
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.tiptap blockquote::before {
+  content: '"';
+  font-size: 3rem;
+  color: #3b82f6;
+  position: absolute;
+  left: 0.5rem;
+  top: -0.5rem;
+  line-height: 1;
+  opacity: 0.3;
+}
+
+/* Horizontal rule styles */
+.tiptap hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent);
+  margin: 3rem 0;
+  position: relative;
+}
+
+.tiptap hr::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: #9ca3af;
+  padding: 0 1rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.5rem;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .tiptap blockquote {
+    background: #1f2937;
+    color: #9ca3af;
+  }
+  
+  .tiptap hr {
+    background: linear-gradient(90deg, transparent, #374151 20%, #374151 80%, transparent);
+  }
+  
+  .tiptap hr::after {
+    background: #111827;
+    color: #6b7280;
+  }
+}
+
+/* Paragraph styles */
+.tiptap p {
+  margin: 1.25rem 0;
+  line-height: 1.5;
+}
+
+/* Link styles */
+.tiptap a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.tiptap a:hover {
+  border-bottom-color: currentColor;
+  opacity: 0.85;
+}
+
+/* Selection styles */
+.tiptap ::selection {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* Image styles */
+.tiptap img.editor-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tiptap img.editor-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.tiptap img.editor-image.ProseMirror-selectednode {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Video styles */
+.tiptap iframe.editor-video {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-lg);
+  margin: 1.5rem auto;
+  display: block;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.tiptap iframe.editor-video.ProseMirror-selectednode {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Audio styles */
+.tiptap audio.editor-audio {
+  width: 100%;
+  max-width: 600px;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--background);
+  box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease;
+}
+
+.tiptap audio.editor-audio:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border-color: var(--primary);
+}
+
+.tiptap audio.editor-audio.ProseMirror-selectednode {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Audio controls styling for better consistency */
+.tiptap audio.editor-audio::-webkit-media-controls-panel {
+  background-color: var(--muted);
+}
+
+.tiptap audio.editor-audio::-webkit-media-controls-play-button,
+.tiptap audio.editor-audio::-webkit-media-controls-pause-button {
+  background-color: var(--primary);
+  border-radius: 50%;
+}
+
+.tiptap audio.editor-audio::-webkit-media-controls-timeline {
+  background-color: var(--muted);
+  border-radius: var(--radius);
+}
+
+.tiptap audio.editor-audio::-webkit-media-controls-current-time-display,
+.tiptap audio.editor-audio::-webkit-media-controls-time-remaining-display {
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
