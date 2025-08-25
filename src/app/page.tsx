@@ -12,8 +12,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: siteSettings.site_title,
     description: siteSettings.site_description,
-    keywords: siteSettings.site_keywords,
-    authors: [{ name: siteSettings.site_author }],
     openGraph: {
       title: siteSettings.site_title,
       description: siteSettings.site_description,
