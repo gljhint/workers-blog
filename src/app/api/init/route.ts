@@ -3,10 +3,26 @@ import { db } from "@/lib/db";
 import { admins, site_settings, categories, tags, posts, comments, post_tags, menus } from "@/lib/schema";
 import bcrypt from 'bcryptjs';
 
-// POST方法用于执行初始化
+// GET方法用于执行初始化
 export async function GET() {
   try {
     console.log('🚀 开始初始化...');
+
+    // 首先测试数据库连接
+    try {
+      await db().select().from(admins).limit(1);
+      console.log('✅ 数据库连接正常');
+    } catch (dbError) {
+      console.error('❌ 数据库连接失败:', dbError);
+      return NextResponse.json(
+        { 
+          error: '数据库连接失败', 
+          details: dbError instanceof Error ? dbError.message : '未知错误',
+          suggestion: '请确保数据库已创建并运行了迁移脚本'
+        },
+        { status: 500 }
+      );
+    }
 
     // 检查是否已经存在管理员账户
     const existingAdmin = await db().select().from(admins).limit(1);
