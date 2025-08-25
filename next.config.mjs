@@ -2,10 +2,6 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 
 const nextConfig = {
-  // 性能优化配置
-  experimental: {
-    optimizeCss: true
-  },
   
   // 图片优化配置
   images: {
