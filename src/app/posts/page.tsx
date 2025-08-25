@@ -11,9 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   return {
     title: `所有文章 - ${siteSettings.site_title}`,
-    description: `浏览我的所有博客文章，包含技术分享、学习笔记和生活感悟。`,
-    keywords: siteSettings.site_keywords,
-    authors: [{ name: siteSettings.site_author }],
+    description: `浏览我的所有博客文章，包含信仰分享、学习笔记和生活感悟。`
   };
 }
 

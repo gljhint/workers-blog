@@ -36,7 +36,6 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   return {
     title: `${post.title} - ${siteSettings.site_title}`,
     description: post.description,
-    keywords: `${siteSettings.site_keywords},${post.title}`,
     authors: post.author ? [{ name: post.author.display_name || post.author.username }] : undefined,
     openGraph: {
       title: post.title,
