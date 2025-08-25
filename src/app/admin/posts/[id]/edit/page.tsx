@@ -6,6 +6,12 @@ import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import Editor from '@/components/editor';
 
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  [key: string]: any;
+};
+
 export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();
@@ -44,7 +50,7 @@ export default function EditPostPage() {
       fetch('/api/categories', {
         credentials: 'include'
       })
-        .then(res => res.json())
+        .then(res => res.json() as Promise<ApiResponse<any[]>>)
         .then(data => {
           if (data.success && Array.isArray(data.data)) {
             setCategories(data.data);
@@ -62,7 +68,7 @@ export default function EditPostPage() {
       fetch('/api/tags', {
         credentials: 'include'
       })
-        .then(res => res.json())
+        .then(res => res.json() as Promise<ApiResponse<any[]>>)
         .then(data => {
           if (data.success && Array.isArray(data.data)) {
             setTags(data.data);
@@ -84,7 +90,7 @@ export default function EditPostPage() {
       fetch(`/api/posts/${params.id}`, {
         credentials: 'include'
       })
-        .then(res => res.json())
+        .then(res => res.json() as Promise<ApiResponse<any>>)
         .then(result => {
           if (result.success) {
             const data = result.data;
@@ -132,7 +138,7 @@ export default function EditPostPage() {
       throw new Error('图片上传失败');
     }
 
-    const result = await response.json();
+    const result = await response.json() as ApiResponse<{ url: string }>;
     return result.data.url;
   };
 
@@ -151,7 +157,7 @@ export default function EditPostPage() {
       throw new Error('音频上传失败');
     }
 
-    const result = await response.json();
+    const result = await response.json() as ApiResponse<{ url: string }>;
     return result.data.url;
   };
 
@@ -170,7 +176,7 @@ export default function EditPostPage() {
       throw new Error('封面图片上传失败');
     }
 
-    const result = await response.json();
+    const result = await response.json() as ApiResponse<{ url: string }>;
     return result.data.url;
   };
 
@@ -214,7 +220,7 @@ export default function EditPostPage() {
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json() as ApiResponse<any>;
       if (result.success) {
         router.push(`/admin/posts`);
       } else {
