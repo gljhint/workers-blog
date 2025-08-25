@@ -11,7 +11,7 @@ import RelatedPosts from '@/components/RelatedPosts';
 import '@/components/editor/style.css';
 
 interface PostPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {

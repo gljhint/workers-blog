@@ -9,7 +9,7 @@ const postController = new PostController();
 // 获取单个文章
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: idParam } = await params;
@@ -44,7 +44,7 @@ export async function GET(
 // 更新文章
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // 认证中间件检查
   const authResult = await authMiddleware(request);
@@ -99,7 +99,7 @@ export async function PUT(
 // 删除文章
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // 认证中间件检查
   const authResult = await authMiddleware(request);

@@ -4,7 +4,7 @@ import { SiteSettingsService } from '@/services/SiteSettingsService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     // 检查评论功能是否开启
