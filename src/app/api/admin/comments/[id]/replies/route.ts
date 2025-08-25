@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/middleware/auth';
 import { getRepliesByCommentId, findCommentById } from '@/models/CommentModel';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // GET /api/admin/comments/[id]/replies - 获取评论的所有回复
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const tokenVerification = await verifyToken(request);
     if (!tokenVerification.valid || !tokenVerification.admin) {
