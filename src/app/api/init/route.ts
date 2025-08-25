@@ -137,7 +137,7 @@ export async function GET() {
     console.log('💬 创建示例评论...');
     
     // 第一篇文章的评论
-    const [comment1] = await db().insert(comments).values({
+    const [{ id: comment1Id }] = await db().insert(comments).values({
       post_id: post1.id,
       parent_id: null,
       author_name: '张三',
@@ -148,12 +148,12 @@ export async function GET() {
       reply_count: 2, // 手动设置，稍后会有2个回复
       created_at: now,
       updated_at: now
-    }).returning();
+    }).returning({ id: comments.id });
 
     // 给第一条评论的回复
     await db().insert(comments).values({
       post_id: post1.id,
-      parent_id: comment1.id,
+      parent_id: comment1Id,
       author_name: '博客作者',
       author_email: 'admin@example.com',
       author_website: null,
@@ -166,7 +166,7 @@ export async function GET() {
 
     await db().insert(comments).values({
       post_id: post1.id,
-      parent_id: comment1.id,
+      parent_id: comment1Id,
       author_name: '李四',
       author_email: 'lisi@example.com',
       author_website: null,
@@ -178,7 +178,7 @@ export async function GET() {
     });
 
     // 第一篇文章的另一条评论
-    const [comment2] = await db().insert(comments).values({
+    const [{ id: comment2Id }] = await db().insert(comments).values({
       post_id: post1.id,
       parent_id: null,
       author_name: '王五',
@@ -189,12 +189,12 @@ export async function GET() {
       reply_count: 1, // 手动设置，稍后会有1个回复
       created_at: new Date(Date.now() + 180000).toISOString(), // 3分钟后
       updated_at: new Date(Date.now() + 180000).toISOString()
-    }).returning();
+    }).returning({ id: comments.id });
 
     // 给第二条评论的回复
     await db().insert(comments).values({
       post_id: post1.id,
-      parent_id: comment2.id,
+      parent_id: comment2Id,
       author_name: '博客作者',
       author_email: 'admin@example.com',
       author_website: null,
@@ -206,7 +206,7 @@ export async function GET() {
     });
 
     // 第二篇文章的评论
-    const [comment3] = await db().insert(comments).values({
+    const insertComment3 = await db().insert(comments).values({
       post_id: post2.id,
       parent_id: null,
       author_name: '赵六',
@@ -217,7 +217,7 @@ export async function GET() {
       reply_count: 0,
       created_at: new Date(Date.now() + 300000).toISOString(), // 5分钟后
       updated_at: new Date(Date.now() + 300000).toISOString()
-    }).returning();
+    });
 
     // 一条待审核的评论
     await db().insert(comments).values({
