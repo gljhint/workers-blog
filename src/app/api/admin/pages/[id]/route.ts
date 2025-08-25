@@ -68,7 +68,15 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      slug: string;
+      title: string;
+      content: string;
+      meta_title: string;
+      meta_description: string;
+      meta_keywords: string;
+      is_published: boolean;
+    };
     const {
       slug,
       title,

@@ -54,7 +54,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as { action: string; ids: number[]; status: string };
     const { action, ids, status } = body;
 
     if (action === 'updateStatus' && Array.isArray(ids) && status) {
@@ -106,7 +106,7 @@ export async function DELETE(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as { ids: number[] };
     const { ids } = body;
 
     if (!Array.isArray(ids) || ids.length === 0) {

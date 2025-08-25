@@ -40,7 +40,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const admin = getAdminFromRequest(request);
-    const data = await request.json();
+    const data = await request.json() as {
+      title: string;
+      description: string;
+      content: string;
+      is_published: boolean;
+      is_featured: boolean;
+      tag_ids: number[];
+      category_id: string | undefined;
+      author_id: string | undefined;
+      cover_image: string;
+      allow_comments: boolean;
+      slug: string;
+    };
     
     // 数据验证
     PostValidator.validateCreatePost(data);
@@ -56,7 +68,8 @@ export async function POST(request: NextRequest) {
       category_id: data.category_id ? parseInt(data.category_id) : undefined,
       author_id: data.author_id ? parseInt(data.author_id) : undefined,
       cover_image: data.cover_image,
-      allow_comments: data.allow_comments !== false
+      allow_comments: data.allow_comments !== false,
+      slug: data.slug
     });
 
     if (!result.success) {

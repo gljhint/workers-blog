@@ -371,9 +371,9 @@ export async function POST(request: NextRequest) {
       message: '数据导入完成',
       results: importResults,
       summary: {
-        total_imported: Object.values(importResults).reduce((sum, result) => sum + result.imported, 0),
-        total_skipped: Object.values(importResults).reduce((sum, result) => sum + result.skipped, 0),
-        total_errors: Object.values(importResults).reduce((sum, result) => sum + result.errors, 0)
+        total_imported: Object.values(importResults).reduce((sum: number, result: any) => sum + result.imported, 0),
+        total_skipped: Object.values(importResults).reduce((sum: number, result: any) => sum + result.skipped, 0),
+        total_errors: Object.values(importResults).reduce((sum: number, result: any) => sum + result.errors, 0)
       }
     });
 

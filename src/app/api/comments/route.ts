@@ -1,21 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createComment } from '@/models/CommentModel';
-import { SiteSettingsService } from '@/services/SiteSettingsService';
 
 export async function POST(request: NextRequest) {
   try {
-    // 检查评论功能是否开启
-    const siteSettingsService = SiteSettingsService.getInstance();
-    const allowComments = await siteSettingsService.getAllowComments();
-    
-    if (!allowComments) {
-      return NextResponse.json({ 
-        success: false, 
-        error: '评论功能已关闭' 
-      }, { status: 403 });
-    }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      post_id: number;
+      author_name: string;
+      author_email: string;
+      author_url: string;
+      content: string;
+      parent_id: number | null;
+    };
     const { post_id, author_name, author_email, author_url, content, parent_id } = body;
 
     // 验证必填字段

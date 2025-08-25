@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as { settings: Record<string, any> };
     const { settings } = body;
 
     if (!settings || typeof settings !== 'object') {

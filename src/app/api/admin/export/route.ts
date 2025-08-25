@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       export_date: new Date().toISOString(),
       export_type: type,
       version: '1.0',
-      total_records: Object.values(exportData).reduce((total, arr) => 
+      total_records: Object.values(exportData).reduce((total: number, arr: any) => 
         total + (Array.isArray(arr) ? arr.length : 0), 0
       )
     };

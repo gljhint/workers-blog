@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCommentsWithReplies, buildCommentTree, createComment } from '@/models/CommentModel';
-import { SiteSettingsService } from '@/services/SiteSettingsService';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // 检查评论功能是否开启
-    const siteSettingsService = SiteSettingsService.getInstance();
-    const allowComments = await siteSettingsService.getAllowComments();
-    
-    if (!allowComments) {
-      return NextResponse.json({ 
-        success: true, 
-        data: [] 
-      });
-    }
 
     const { postId: postIdParam } = await params;
     const postId = parseInt(postIdParam);

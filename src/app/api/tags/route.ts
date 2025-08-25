@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
   if (authResult) return authResult;
 
   try {
-    const data = await request.json();
+    const data = await request.json() as {
+      name: string;
+      description: string;
+    };
     
     // 数据验证
     TagValidator.validateCreateTag(data);

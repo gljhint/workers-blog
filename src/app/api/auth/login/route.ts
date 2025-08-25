@@ -6,7 +6,7 @@ const authController = new AuthController();
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const data = await request.json() as { username: string; password: string };
     
     // 基本验证
     if (!data.username || !data.password) {

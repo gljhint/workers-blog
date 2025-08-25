@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as { username: string; email: string; currentPassword: string; newPassword: string };
     const { username, email, currentPassword, newPassword } = body;
 
     if (!username || !email) {

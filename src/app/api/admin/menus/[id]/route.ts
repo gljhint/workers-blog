@@ -4,7 +4,7 @@ import { findMenuById, updateMenu, deleteMenu } from '@/models/MenuModel';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -15,15 +15,16 @@ export async function GET(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的菜单ID' 
       }, { status: 400 });
     }
 
-    const menu = await findMenuById(id);
+    const menu = await findMenuById(idInt);
     
     if (!menu) {
       return NextResponse.json({ 
@@ -47,7 +48,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -58,15 +59,24 @@ export async function PUT(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的菜单ID' 
       }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      title: string;
+      url: string;
+      icon: string | null;
+      parent_id: number | null;
+      menu_order: number;
+      target: string;
+      description: string;
+    };
     const { title, url, icon, parent_id, menu_order, target, description } = body;
 
     if (!title || !url) {
@@ -77,17 +87,17 @@ export async function PUT(
     }
 
     // 检查是否试图将菜单设为自己的子菜单
-    if (parent_id === id) {
+    if (parent_id === idInt) {
       return NextResponse.json({ 
         success: false, 
         error: '菜单不能设为自己的子菜单' 
       }, { status: 400 });
     }
 
-    const menu = await updateMenu(id, {
+    const menu = await updateMenu(idInt, {
       title,
       url,
-      icon,
+      icon: icon || undefined,
       description,
       parent_id: parent_id || undefined,
       menu_order,
@@ -117,7 +127,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -128,15 +138,16 @@ export async function DELETE(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的菜单ID' 
       }, { status: 400 });
     }
 
-    const success = await deleteMenu(id);
+    const success = await deleteMenu(idInt);
 
     if (!success) {
       return NextResponse.json({ 

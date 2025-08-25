@@ -3,10 +3,11 @@ import { findPageBySlug } from '@/models/PageModel';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug: slugParam } = await params;
+    const slug = slugParam.toLowerCase();
 
     if (!slug) {
       return NextResponse.json({ 

@@ -60,7 +60,17 @@ export async function PUT(
       );
     }
 
-    const data = await request.json();
+    const data = await request.json() as {
+      title: string;
+      description: string;
+      content: string;
+      is_published: boolean;
+      is_featured: boolean;
+      tag_ids: number[];
+      category_id: string | undefined;
+      cover_image: string;
+      allow_comments: boolean;
+    };
     
     // 数据验证
     PostValidator.validateUpdatePost(data);

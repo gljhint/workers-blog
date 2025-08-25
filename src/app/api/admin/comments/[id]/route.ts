@@ -4,7 +4,7 @@ import { findCommentById, updateComment, deleteComment } from '@/models/CommentM
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -15,15 +15,16 @@ export async function GET(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的评论ID' 
       }, { status: 400 });
     }
 
-    const comment = await findCommentById(id);
+    const comment = await findCommentById(idInt);
     
     if (!comment) {
       return NextResponse.json({ 
@@ -47,7 +48,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -58,15 +59,22 @@ export async function PUT(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的评论ID' 
       }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      author_name: string;
+      author_email: string;
+      author_website: string;
+      content: string;
+      status: string;
+    };
     const { author_name, author_email, author_website, content, status } = body;
 
     if (!author_name || !author_email || !content) {
@@ -91,7 +99,7 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    const comment = await updateComment(id, {
+    const comment = await updateComment(idInt, {
       author_name,
       author_email,
       author_website,
@@ -122,7 +130,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const tokenVerification = await verifyToken(request);
@@ -133,15 +141,16 @@ export async function DELETE(
       }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idInt = parseInt(id);
+    if (isNaN(idInt)) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的评论ID' 
       }, { status: 400 });
     }
 
-    const success = await deleteComment(id);
+    const success = await deleteComment(idInt);
 
     if (!success) {
       return NextResponse.json({ 
