@@ -4,8 +4,7 @@ initOpenNextCloudflareForDev();
 const nextConfig = {
   // 性能优化配置
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['@headlessui/react', '@heroicons/react']
+    optimizeCss: true
   },
   
   // 图片优化配置
