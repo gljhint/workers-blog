@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import Editor from '@/components/editor';
+import FileUploader from '@/components/FileUploader';
+import { uploadFile } from '@/lib/uploadUtils';
 
 type ApiResponse<T> = {
   success: boolean;
@@ -21,7 +23,6 @@ export default function EditPostPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -123,74 +124,44 @@ export default function EditPostPage() {
     }
   }, [params.id, isAuthenticated, router]);
 
+  // 使用新的上传工具，返回 Promise 以支持编辑器
   const handleImageUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'image');
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('图片上传失败');
+    try {
+      const result = await uploadFile(file, { type: 'image' });
+      if (result.success && result.data) {
+        return result.data.url;
+      } else {
+        throw new Error(result.error || '图片上传失败');
+      }
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : '图片上传失败');
     }
-
-    const result = await response.json() as ApiResponse<{ url: string }>;
-    return result.data.url;
   };
 
   const handleAudioUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'audio');
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('音频上传失败');
-    }
-
-    const result = await response.json() as ApiResponse<{ url: string }>;
-    return result.data.url;
-  };
-
-  const handleCoverUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'cover');
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('封面图片上传失败');
-    }
-
-    const result = await response.json() as ApiResponse<{ url: string }>;
-    return result.data.url;
-  };
-
-  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCoverImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCoverImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    try {
+      const result = await uploadFile(file, { type: 'audio' });
+      if (result.success && result.data) {
+        return result.data.url;
+      } else {
+        throw new Error(result.error || '音频上传失败');
+      }
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : '音频上传失败');
     }
   };
+
+  // 封面上传成功处理
+  const handleCoverUploadSuccess = (url: string) => {
+    setFormData(prev => ({ ...prev, cover_image: url }));
+    setCoverImagePreview(url);
+  };
+
+  const handleCoverUploadError = (error: string) => {
+    setError(error);
+    console.error('封面上传失败:', error);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,12 +169,7 @@ export default function EditPostPage() {
     setError('');
 
     try {
-      let coverImageUrl = formData.cover_image;
-      
-      // 上传封面图片
-      if (coverImage) {
-        coverImageUrl = await handleCoverUpload(coverImage);
-      }
+      const coverImageUrl = formData.cover_image; // 封面已经在上传时设置
 
       const response = await fetch(`/api/posts/${params.id}`, {
         method: 'PUT',
@@ -485,38 +451,45 @@ export default function EditPostPage() {
               {/* 封面图片上传 */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">封面图片</h3>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    {coverImagePreview ? (
-                      <div className="mb-4">
-                        <img src={coverImagePreview} alt="封面预览" className="mx-auto h-32 w-auto rounded-md" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCoverImage(null);
-                            setCoverImagePreview('');
-                            setFormData({ ...formData, cover_image: '' });
-                          }}
-                          className="mt-2 text-sm text-red-600 hover:text-red-700"
-                        >
-                          移除图片
-                        </button>
-                      </div>
-                    ) : (
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                      <label htmlFor="cover_image" className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                        <span>上传封面图片</span>
-                        <input id="cover_image" name="cover_image" type="file" accept="image/*" onChange={handleCoverImageChange} className="sr-only" />
-                      </label>
-                      <p className="pl-1">或拖拽文件到这里</p>
+                {coverImagePreview ? (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <img src={coverImagePreview} alt="封面预览" className="mx-auto h-32 w-auto rounded-md shadow-md" />
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF 最大 10MB</p>
+                    <div className="flex justify-center space-x-2">
+                      <FileUploader
+                        type="cover"
+                        accept="image/*"
+                        maxSize={10 * 1024 * 1024}
+                        onUploadSuccess={handleCoverUploadSuccess}
+                        onUploadError={handleCoverUploadError}
+                        className="flex-1"
+                      >
+                        <div className="text-sm text-blue-600 hover:text-blue-700">
+                          更换封面图片
+                        </div>
+                      </FileUploader>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCoverImagePreview('');
+                          setFormData(prev => ({ ...prev, cover_image: '' }));
+                        }}
+                        className="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-md"
+                      >
+                        移除
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <FileUploader
+                    type="cover"
+                    accept="image/*"
+                    maxSize={10 * 1024 * 1024}
+                    onUploadSuccess={handleCoverUploadSuccess}
+                    onUploadError={handleCoverUploadError}
+                  />
+                )}
               </div>
             </div>
           </div>

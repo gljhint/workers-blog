@@ -10,6 +10,7 @@ interface Post {
   slug: string;
   description: string;
   is_published: boolean;
+  is_featured?: boolean;
   view_count: number;
   created_at: string;
   updated_at: string;
@@ -226,8 +227,18 @@ export default function AdminPostsPage() {
                             )}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {post.title}
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {post.title}
+                              </span>
+                              {post.is_featured && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                  置顶
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                               {post.description}

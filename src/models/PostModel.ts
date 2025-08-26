@@ -37,7 +37,7 @@ export async function getAllPosts(): Promise<Post[]> {
   try {
     const result = await db().select()
       .from(posts)
-      .orderBy(desc(posts.created_at));
+      .orderBy(desc(posts.is_featured), desc(posts.created_at));
 
     return result;
   } catch (error) {
@@ -51,7 +51,7 @@ export async function getPublishedPosts(): Promise<Post[]> {
     const result = await db().select()
       .from(posts)
       .where(eq(posts.is_published, true))
-      .orderBy(desc(posts.published_at), desc(posts.created_at));
+      .orderBy(desc(posts.is_featured), desc(posts.published_at), desc(posts.created_at));
 
     return result;
   } catch (error) {
@@ -249,7 +249,7 @@ export async function getPostsByCategorySlug(categorySlug: string): Promise<Post
         eq(posts.is_published, true),
         eq(categories.slug, categorySlug)
       ))
-      .orderBy(desc(posts.published_at));
+      .orderBy(desc(posts.is_featured), desc(posts.published_at));
 
     return result.map(row => row.posts);
   } catch (error) {
@@ -288,7 +288,7 @@ export async function getPostsByTagSlug(tagSlug: string): Promise<Post[]> {
         eq(posts.is_published, true),
         eq(tags.slug, tagSlug)
       ))
-      .orderBy(desc(posts.published_at));
+      .orderBy(desc(posts.is_featured), desc(posts.published_at));
 
     return result;
   } catch (error) {
@@ -304,7 +304,7 @@ export async function getAllPostsWithDetails(): Promise<any[]> {
       .select()
       .from(posts)
       .leftJoin(categories, eq(posts.category_id, categories.id))
-      .orderBy(desc(posts.created_at));
+      .orderBy(desc(posts.is_featured), desc(posts.created_at));
 
     return result.map(row => ({
       id: row.posts.id,

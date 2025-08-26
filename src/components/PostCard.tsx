@@ -11,9 +11,17 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const categoryColor = post.category ? generateCategoryColor(post.category.id) : undefined;
   return (
-    <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+    <article className={`bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ${post.is_featured ? 'ring-2 ring-yellow-400 dark:ring-yellow-500' : ''}`}>
       {post.cover_image && (
         <div className="relative h-48 w-full overflow-hidden">
+          {post.is_featured && (
+            <div className="absolute top-3 left-3 z-10 bg-yellow-400 dark:bg-yellow-500 text-yellow-800 dark:text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              置顶
+            </div>
+          )}
           <Image
             src={post.cover_image}
             alt={post.title}
@@ -29,6 +37,14 @@ export default function PostCard({ post }: PostCardProps) {
       
       <div className="p-6">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+          {post.is_featured && !post.cover_image && (
+            <span className="bg-yellow-400 dark:bg-yellow-500 text-yellow-800 dark:text-yellow-900 px-2 py-0.5 rounded-full text-xs font-bold flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              置顶
+            </span>
+          )}
           <time dateTime={post.published_at || post.created_at}>
             {formatDate(post.published_at || post.created_at)}
           </time>
