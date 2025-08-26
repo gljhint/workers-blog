@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/middleware/auth';
-import { findAdminById, findAdminByUsername, findAdminByEmail } from '@/models/AdminModel';
+import { findAdminById, findAdminByUsername, findAdminByEmail, updateAdmin } from '@/models/AdminModel';
 import bcrypt from 'bcryptjs';
 
 export async function GET(request: NextRequest) {
@@ -117,17 +117,19 @@ export async function PUT(request: NextRequest) {
       passwordHash = await bcrypt.hash(newPassword, 12);
     }
 
-    // TODO: 实现真正的数据库更新操作
-    // AdminModel 需要添加 update 方法
-    
-    // 暂时返回模拟的更新结果
-    const updatedAdmin = {
-      ...admin,
+    // 更新数据库中的用户信息
+    const updatedAdmin = await updateAdmin(admin.id, {
       username,
       email,
-      password_hash: passwordHash,
-      updated_at: new Date().toISOString()
-    };
+      password_hash: passwordHash
+    });
+
+    if (!updatedAdmin) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '更新失败' 
+      }, { status: 500 });
+    }
 
     // 返回更新后的用户信息（不包含密码）
     const { password_hash, ...adminData } = updatedAdmin;

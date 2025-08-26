@@ -2,11 +2,12 @@ import { db } from "@/lib/db";
 import { pages } from "@/lib/schema";
 import { eq, and, desc, asc, like, count, ne, or } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
+import { generateSlugFromText } from "@/lib/slugUtils";
 
 export type Page = InferSelectModel<typeof pages>;
 
 export interface CreatePageData {
-  slug: string;
+  slug?: string; // 现在 slug 是可选的，可以自动生成
   title: string;
   content: string;
   meta_title?: string;
@@ -35,11 +36,32 @@ export interface PageListResult {
   };
 }
 
+export async function generateUniquePageSlug(title: string): Promise<string> {
+  let baseSlug = generateSlugFromText(title);
+  
+  // 如果生成的slug为空，使用默认值
+  if (!baseSlug || baseSlug.trim() === '' || baseSlug === '-') {
+    const timestamp = Date.now();
+    baseSlug = `page-${timestamp}`;
+  }
+  
+  let slug = baseSlug;
+  let counter = 1;
+  while (await pageSlugExists(slug)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  return slug;
+}
+
 export async function createPage(data: CreatePageData): Promise<Page | null> {
   try {
+    const slug = data.slug || await generateUniquePageSlug(data.title);
     const now = new Date().toISOString();
+    
     const result = await db().insert(pages).values({
       ...data,
+      slug,
       is_published: data.is_published ?? false,
       created_at: now,
       updated_at: now

@@ -32,12 +32,6 @@ export default function PostCard({ post }: PostCardProps) {
           <time dateTime={post.published_at || post.created_at}>
             {formatDate(post.published_at || post.created_at)}
           </time>
-          {post.author && (
-            <>
-              <span>•</span>
-              <span>{post.author.display_name || post.author.username}</span>
-            </>
-          )}
           {post.category && (
             <>
               <span>•</span>

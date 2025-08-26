@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { tags, posts, post_tags } from "@/lib/schema";
 import { eq, count, and } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
+import { generateSlugFromText } from "@/lib/slugUtils";
 
 export type Tag = InferSelectModel<typeof tags>;
 
@@ -66,11 +67,14 @@ export async function findOrCreateTagByName(name: string): Promise<Tag | null> {
 }
 
 export async function generateUniqueTagSlug(name: string): Promise<string> {
-  let baseSlug = name.toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .trim();
-
+  let baseSlug = generateSlugFromText(name);
+  
+  // 如果生成的slug为空，使用默认值
+  if (!baseSlug || baseSlug.trim() === '' || baseSlug === '-') {
+    const timestamp = Date.now();
+    baseSlug = `tag-${timestamp}`;
+  }
+  
   let slug = baseSlug;
   let counter = 1;
 

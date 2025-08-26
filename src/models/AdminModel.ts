@@ -20,6 +20,15 @@ export interface AdminLoginData {
   password: string;
 }
 
+export interface UpdateAdminData {
+  username?: string;
+  email?: string;
+  password_hash?: string;
+  display_name?: string;
+  bio?: string;
+  avatar?: string;
+}
+
 export async function findAdminByUsername(username: string): Promise<Admin | null> {
   try {
     const result = await db().select()
@@ -92,6 +101,33 @@ export async function updateLastLogin(id: number): Promise<boolean> {
   } catch (error) {
     console.error('更新最后登录时间失败:', error);
     return false;
+  }
+}
+
+export async function updateAdmin(id: number, data: UpdateAdminData): Promise<Admin | null> {
+  try {
+    const cleanData: Record<string, any> = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cleanData[key] = value;
+      }
+    });
+
+    if (Object.keys(cleanData).length === 0) {
+      return findAdminById(id);
+    }
+
+    cleanData.updated_at = new Date().toISOString();
+
+    const result = await db().update(admins)
+      .set(cleanData)
+      .where(eq(admins.id, id))
+      .returning();
+
+    return result[0] || null;
+  } catch (error) {
+    console.error('更新管理员信息失败:', error);
+    return null;
   }
 }
 

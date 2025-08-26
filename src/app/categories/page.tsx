@@ -6,6 +6,9 @@ import { generateCategoryColor } from '@/lib/colors';
 export const metadata: Metadata = {
   title: '文章分类',
   description: '浏览所有文章分类，查找你感兴趣的内容。',
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/categories`,
+  },
 };
 
 export default async function CategoriesPage() {

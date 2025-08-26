@@ -25,7 +25,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${pageTitle} - ${siteTitle}`,
     description: page.meta_description,
-    keywords: page.meta_keywords,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/pages/${page.slug}`,
+    },
     openGraph: {
       title: pageTitle,
       description: page.meta_description || '',

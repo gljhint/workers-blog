@@ -29,8 +29,11 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   const posts = await getPostsByTag(resolvedParams.slug);
 
   return {
-    title: `${tag.name} - 标签页面`,
+    title: `${tag.name} - 标签`,
     description: tag.description || `查看所有关于 ${tag.name} 的文章，共 ${posts.length} 篇文章。`,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/tags/${tag.slug}`,
+    },
   };
 }
 

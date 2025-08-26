@@ -30,8 +30,11 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const posts = await getPostsByCategory(resolvedParams.slug);
 
   return {
-    title: `${category.name} - 分类页面`,
+    title: `${category.name} - 分类`,
     description: category.description || `查看所有 ${category.name} 分类的文章，共 ${posts.length} 篇文章。`,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/categories/${category.slug}`,
+    },
   };
 }
 

@@ -40,6 +40,8 @@ cp .env.example .env.local
 npx wrangler d1 create my-blog-db
 npx wrangler d1 execute my-blog-db --local --file=./schema.sql
 ```
+# 线上
+npx wrangler d1 execute my-blog-db --remote --file=./schema.sql
 
 ### 5. 启动开发服务器
 

@@ -2,11 +2,13 @@ import { db } from "@/lib/db";
 import { categories, posts } from "@/lib/schema";
 import { eq, count, desc, and } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
+import { generateSlugFromText } from "@/lib/slugUtils";
 
 export type Category = InferSelectModel<typeof categories>;
 
 export interface CreateCategoryData {
   name: string;
+  slug?: string;
   description?: string;
 }
 
@@ -76,21 +78,30 @@ export async function findCategoryBySlug(slug: string): Promise<Category | null>
 }
 
 async function generateUniqueCategorySlug(name: string): Promise<string> {
-  let baseSlug = name.toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .trim();
-
+  let baseSlug = generateSlugFromTitle(name);
+  
+  // 如果生成的slug为空，使用默认值
+  if (!baseSlug || baseSlug.trim() === '' || baseSlug === '-') {
+    const timestamp = Date.now();
+    baseSlug = `category-${timestamp}`;
+  }
+  
   let slug = baseSlug;
   let counter = 1;
-
   while (await categorySlugExists(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
   }
-
   return slug;
 }
+
+/**
+ * 从标题生成slug，支持中文转拼音
+ */
+function generateSlugFromTitle(title: string): string {
+  return generateSlugFromText(title);
+}
+
 
 async function categorySlugExists(slug: string): Promise<boolean> {
   try {
@@ -107,7 +118,7 @@ async function categorySlugExists(slug: string): Promise<boolean> {
 
 export async function createCategory(data: CreateCategoryData): Promise<Category | null> {
   try {
-    const slug = await generateUniqueCategorySlug(data.name);
+    const slug = data.slug || await generateUniqueCategorySlug(data.name);
     const now = new Date().toISOString();
     
     const result = await db().insert(categories).values({
@@ -133,6 +144,13 @@ export async function updateCategory(id: number, data: Partial<CreateCategoryDat
 
     if (data.name !== undefined) {
       updateData.name = data.name;
+    }
+
+    if (data.slug !== undefined) {
+      updateData.slug = data.slug;
+    } else if (data.name !== undefined) {
+      // 如果修改了名称但没有提供slug，则重新生成slug
+      updateData.slug = await generateUniqueCategorySlug(data.name);
     }
 
     if (data.description !== undefined) {

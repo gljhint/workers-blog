@@ -54,26 +54,45 @@ export async function PUT(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json() as { action: string; ids: number[]; status: string };
-    const { action, ids, status } = body;
+    const body = await request.json() as { 
+      action: string; 
+      ids: number[]; 
+      status?: string;
+      is_approved?: boolean;
+    };
+    const { action, ids, status, is_approved } = body;
 
-    if (action === 'updateStatus' && Array.isArray(ids) && status) {
-      const validStatuses = ['approved', 'rejected', 'spam'];
-      if (!validStatuses.includes(status)) {
+    if (action === 'updateStatus' && Array.isArray(ids)) {
+      let isApproved: boolean;
+      let message: string;
+      
+      // 支持两种参数格式：新的 is_approved (前端发送) 和旧的 status 格式
+      if (typeof is_approved === 'boolean') {
+        isApproved = is_approved;
+        message = isApproved ? '已批准评论' : '已设置为待审核';
+      } else if (status) {
+        const validStatuses = ['approved', 'rejected', 'spam', 'pending'];
+        if (!validStatuses.includes(status)) {
+          return NextResponse.json({ 
+            success: false, 
+            error: '无效的状态' 
+          }, { status: 400 });
+        }
+        isApproved = status === 'approved';
+        message = `已${status === 'approved' ? '批准' : status === 'rejected' ? '拒绝' : status === 'pending' ? '设置为待审核' : '标记为垃圾'}评论`;
+      } else {
         return NextResponse.json({ 
           success: false, 
-          error: '无效的状态' 
+          error: '缺少状态参数' 
         }, { status: 400 });
       }
 
-      // Convert status to boolean (only 'approved' becomes true, others false)
-      const isApproved = status === 'approved';
       const success = await updateCommentsStatus(ids, isApproved);
       
       if (success) {
         return NextResponse.json({
           success: true,
-          message: `已${status === 'approved' ? '批准' : status === 'rejected' ? '拒绝' : '标记为垃圾'}评论`
+          message
         });
       } else {
         return NextResponse.json({ 

@@ -10,7 +10,8 @@
       "Bash(curl:*)",
       "Bash(npm run:*)",
       "Bash(del next.config.ts)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

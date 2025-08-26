@@ -3,8 +3,11 @@ import Link from 'next/link';
 import { getAllTags, getAllPosts } from '@/lib/blog';
 
 export const metadata: Metadata = {
-  title: '所有标签 - 我的博客',
+  title: '所有标签',
   description: '浏览我的博客的所有文章标签，按主题快速找到感兴趣的内容。',
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/tags`,
+  },
 };
 
 export default async function TagsPage() {

@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       is_featured: Boolean(data.is_featured),
       tag_ids: Array.isArray(data.tag_ids) ? data.tag_ids : [],
       category_id: data.category_id ? parseInt(data.category_id) : undefined,
-      author_id: data.author_id ? parseInt(data.author_id) : undefined,
+      author_id: admin?.id || undefined, // 使用当前登录用户的ID
       cover_image: data.cover_image,
       allow_comments: data.allow_comments !== false,
       slug: data.slug

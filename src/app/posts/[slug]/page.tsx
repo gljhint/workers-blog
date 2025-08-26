@@ -37,6 +37,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     title: `${post.title} - ${siteSettings.site_title}`,
     description: post.description,
     authors: post.author ? [{ name: post.author.display_name || post.author.username }] : undefined,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/posts/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.description,
@@ -84,19 +87,7 @@ export default async function PostPage({ params }: PostPageProps) {
         <div className="flex flex-col lg:flex-row lg:gap-8">
           {/* 左栏：主要内容 */}
           <main className="flex-1 lg:w-2/3">
-            <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-              {post.cover_image && (
-                <div className="relative h-64 md:h-96 w-full">
-                  <Image
-                    src={post.cover_image}
-                    alt={post.title}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              )}
-              
+            <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">              
               <div className="p-8">
                 <header className="mb-8">
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">

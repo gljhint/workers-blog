@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json() as {
-      slug: string;
+      slug?: string; // slug 现在是可选的
       title: string;
       content: string;
       meta_title: string;
@@ -78,33 +78,35 @@ export async function POST(request: NextRequest) {
       is_published
     } = body;
 
-    // 验证必填字段
-    if (!slug || !title || !content) {
+    // 验证必填字段（现在不需要 slug）
+    if (!title || !content) {
       return NextResponse.json({ 
         success: false, 
-        error: '请填写所有必填字段' 
+        error: '请填写标题和内容' 
       }, { status: 400 });
     }
 
-    // 验证slug格式（只允许字母、数字、横线、下划线）
-    if (!/^[a-zA-Z0-9-_]+$/.test(slug)) {
+    // 如果提供了 slug，验证slug格式（只允许字母、数字、横线、下划线）
+    if (slug && !/^[a-zA-Z0-9-_]+$/.test(slug)) {
       return NextResponse.json({ 
         success: false, 
         error: 'URL别名只能包含字母、数字、横线和下划线' 
       }, { status: 400 });
     }
 
-    // 检查slug是否已存在
-    const slugExists = await pageSlugExists(slug);
-    if (slugExists) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'URL别名已存在，请使用其他别名' 
-      }, { status: 400 });
+    // 如果提供了 slug，检查是否已存在
+    if (slug) {
+      const slugExists = await pageSlugExists(slug);
+      if (slugExists) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'URL别名已存在，请使用其他别名' 
+        }, { status: 400 });
+      }
     }
 
     const page = await createPage({
-      slug: slug.trim(),
+      slug: slug?.trim(), // slug 现在是可选的
       title: title.trim(),
       content: content.trim(),
       meta_title: meta_title?.trim(),

@@ -11,7 +11,10 @@ export async function generateMetadata(): Promise<Metadata> {
   
   return {
     title: `所有文章 - ${siteSettings.site_title}`,
-    description: `浏览我的所有博客文章，包含信仰分享、学习笔记和生活感悟。`
+    description: `浏览我的所有博客文章，包含信仰分享、学习笔记和生活感悟。`,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/posts`,
+    },
   };
 }
 

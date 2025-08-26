@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { posts, categories, tags, post_tags } from "@/lib/schema";
 import { eq, and, desc, count, like, sql } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
+import { generateSlugFromText } from "@/lib/slugUtils";
 
 export type Post = InferSelectModel<typeof posts>;
 
@@ -169,21 +170,30 @@ export async function postSlugExists(slug: string, excludeId?: number): Promise<
 }
 
 export async function generateUniquePostSlug(title: string): Promise<string> {
-  let baseSlug = title.toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .trim();
-
+  let baseSlug = generateSlugFromTitle(title);
+  
+  // 如果生成的slug为空，使用默认值
+  if (!baseSlug || baseSlug.trim() === '' || baseSlug === '-') {
+    const timestamp = Date.now();
+    baseSlug = `post-${timestamp}`;
+  }
+  
   let slug = baseSlug;
   let counter = 1;
-
   while (await postSlugExists(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
   }
-
   return slug;
 }
+
+/**
+ * 从标题生成slug，支持中文转拼音
+ */
+function generateSlugFromTitle(title: string): string {
+  return generateSlugFromText(title);
+}
+
 
 export async function incrementPostViewCount(slug: string): Promise<boolean> {
   try {
