@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { generateCategoryColor } from '@/lib/colors';
+import { generateSlugFromText } from '@/lib/slugUtils';
 
 interface Category {
   id: number;
@@ -69,14 +70,9 @@ export default function CategoriesManagement() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // 自动生成slug
+    // 自动生成slug - 使用拼音转换
     if (name === 'name' && !editingCategory) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
+      const slug = generateSlugFromText(value);
       setFormData(prev => ({ ...prev, slug }));
     }
 

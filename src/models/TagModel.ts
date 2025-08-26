@@ -8,6 +8,7 @@ export type Tag = InferSelectModel<typeof tags>;
 
 export interface CreateTagData {
   name: string;
+  slug?: string;
   description?: string;
 }
 
@@ -101,7 +102,7 @@ export async function tagSlugExists(slug: string): Promise<boolean> {
 
 export async function createTag(data: CreateTagData): Promise<Tag | null> {
   try {
-    const slug = await generateUniqueTagSlug(data.name);
+    const slug = data.slug || await generateUniqueTagSlug(data.name);
     const now = new Date().toISOString();
     
     const result = await db().insert(tags).values({

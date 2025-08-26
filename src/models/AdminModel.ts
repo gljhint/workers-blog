@@ -151,7 +151,10 @@ export async function validateAdminLogin(data: AdminLoginData): Promise<{ succes
 
     await updateLastLogin(admin.id);
 
-    return { success: true, data: admin };
+    // 重新获取更新后的用户数据，包含最新的 last_login 时间
+    const updatedAdmin = await findAdminById(admin.id);
+
+    return { success: true, data: updatedAdmin || admin };
   } catch (error) {
     console.error('验证登录失败:', error);
     return { success: false, error: '登录验证失败' };

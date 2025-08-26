@@ -58,6 +58,7 @@ export class CategoryController extends BaseController {
    */
   async createCategory(data: {
     name: string;
+    slug?: string;
     description?: string;
     color?: string;
   }): Promise<{ success: boolean; data?: Category; error?: string }> {
@@ -78,6 +79,7 @@ export class CategoryController extends BaseController {
 
       const result = await createCategory({
         name: sanitizedData.name,
+        slug: sanitizedData.slug,
         description: sanitizedData.description
       });
       return result as Category;

@@ -48,9 +48,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json() as {
       name: string;
+      slug?: string;
       description?: string;
     };
-    const { name, description } = body;
+    const { name, slug, description } = body;
 
     if (!name) {
       return NextResponse.json({ 
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
 
     const result = await categoryController.createCategory({
       name,
+      slug,
       description: description || ''
     });
 

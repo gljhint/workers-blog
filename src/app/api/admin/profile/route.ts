@@ -48,8 +48,16 @@ export async function PUT(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json() as { username: string; email: string; currentPassword: string; newPassword: string };
-    const { username, email, currentPassword, newPassword } = body;
+    const body = await request.json() as { 
+      username: string; 
+      email: string; 
+      display_name?: string;
+      bio?: string;
+      avatar?: string;
+      currentPassword?: string; 
+      newPassword?: string; 
+    };
+    const { username, email, display_name, bio, avatar, currentPassword, newPassword } = body;
 
     if (!username || !email) {
       return NextResponse.json({ 
@@ -121,6 +129,9 @@ export async function PUT(request: NextRequest) {
     const updatedAdmin = await updateAdmin(admin.id, {
       username,
       email,
+      display_name,
+      bio,
+      avatar,
       password_hash: passwordHash
     });
 

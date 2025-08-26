@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const body = await request.json() as { name: string; description?: string };
-    const { name, description } = body;
+    const body = await request.json() as { name: string; slug?: string; description?: string };
+    const { name, slug, description } = body;
 
     if (!name) {
       return NextResponse.json({ 
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
 
     const result = await tagController.createTag({
       name,
+      slug,
       description: description || ''
     });
 

@@ -75,6 +75,7 @@ export class TagController extends BaseController {
    */
   async createTag(data: {
     name: string;
+    slug?: string;
     description?: string;
   }): Promise<{ success: boolean; data?: Tag; error?: string }> {
     return await this.handleAsync(async () => {
@@ -88,7 +89,8 @@ export class TagController extends BaseController {
       const sanitizedData = this.sanitizeInput(data);
 
       const result = await createTag({
-        name: sanitizedData.name
+        name: sanitizedData.name,
+        slug: sanitizedData.slug
       });
       return result as Tag;
     }, '创建标签失败');

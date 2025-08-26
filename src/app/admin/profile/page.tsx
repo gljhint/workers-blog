@@ -8,8 +8,11 @@ interface Admin {
   id: number;
   username: string;
   email: string;
+  display_name?: string;
+  bio?: string;
+  avatar?: string;
   created_at: string;
-  last_login_at: string;
+  last_login?: string;
 }
 
 export default function AdminProfile() {
@@ -18,6 +21,9 @@ export default function AdminProfile() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    display_name: '',
+    bio: '',
+    avatar: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -51,7 +57,10 @@ export default function AdminProfile() {
           setFormData(prev => ({
             ...prev,
             username: result.data.username,
-            email: result.data.email
+            email: result.data.email,
+            display_name: result.data.display_name || '',
+            bio: result.data.bio || '',
+            avatar: result.data.avatar || ''
           }));
         }
       }
@@ -61,7 +70,7 @@ export default function AdminProfile() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
@@ -103,6 +112,9 @@ export default function AdminProfile() {
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
+          display_name: formData.display_name,
+          bio: formData.bio,
+          avatar: formData.avatar,
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword
         }),
@@ -176,25 +188,52 @@ export default function AdminProfile() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 账户信息
               </h2>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">用户ID</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{admin.id}</p>
+              <div className="space-y-4">
+                {/* 头像和显示名称 */}
+                <div className="flex items-center space-x-3">
+                  {admin.avatar ? (
+                    <img
+                      src={admin.avatar}
+                      alt="头像"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(admin.display_name || admin.username)}&size=64&background=3b82f6&color=ffffff`;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold">
+                      {(admin.display_name || admin.username).charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {admin.display_name || admin.username}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">@{admin.username}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">注册时间</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {new Date(admin.created_at).toLocaleDateString('zh-CN')}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">最后登录</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {admin.last_login_at 
-                      ? new Date(admin.last_login_at).toLocaleDateString('zh-CN')
-                      : '从未登录'
-                    }
-                  </p>
+
+                {admin.bio && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">个人简介</p>
+                    <p className="text-sm text-gray-900 dark:text-white mt-1">{admin.bio}</p>
+                  </div>
+                )}
+                
+                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">用户ID</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{admin.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">最后登录</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {admin.last_login 
+                        ? new Date(admin.last_login).toLocaleDateString('zh-CN')
+                        : '从未登录'
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -220,35 +259,95 @@ export default function AdminProfile() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* 基本信息 */}
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        用户名
+                      </label>
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        邮箱
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      用户名
+                    <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      显示名称
                     </label>
                     <input
                       type="text"
-                      id="username"
-                      name="username"
-                      value={formData.username}
+                      id="display_name"
+                      name="display_name"
+                      value={formData.display_name}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      required
+                      placeholder="公开显示的名称（可选）"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      邮箱
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      个人简介
+                    </label>
+                    <textarea
+                      id="bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      placeholder="介绍一下自己（可选）"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      头像 URL
                     </label>
                     <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
+                      type="url"
+                      id="avatar"
+                      name="avatar"
+                      value={formData.avatar}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      required
+                      placeholder="头像图片链接（可选）"
                     />
+                    {formData.avatar && (
+                      <div className="mt-2">
+                        <img
+                          src={formData.avatar}
+                          alt="头像预览"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 

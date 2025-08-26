@@ -121,12 +121,6 @@ export default async function PostPage({ params }: PostPageProps) {
                       <span>{post.view_count} 次浏览</span>
                     </div>
                   </div>
-                  
-                  {post.description && (
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                      {post.description}
-                    </p>
-                  )}
                 </header>
 
                 <div 

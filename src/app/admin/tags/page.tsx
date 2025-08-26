@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import { generateSlugFromText } from '@/lib/slugUtils';
 
 interface Tag {
   id: number;
@@ -67,13 +68,9 @@ export default function TagsManagement() {
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // 自动生成slug
+    // 自动生成slug - 使用拼音转换
     if (name === 'name' && !editingTag) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
+      const slug = generateSlugFromText(value);
       setFormData(prev => ({ ...prev, slug }));
     }
 
