@@ -14,10 +14,17 @@ export function generateSlugFromText(text: string): string {
     slug = text
       .trim()
       .replace(/\s+/g, '-')
-      .replace(/[<>:"\/\\|?*]/g, '') // 移除文件系统不友好字符
+      .replace(/[<>:"\/\\|?*《》（）【】「」""''！？。，、；：]/g, '') // 移除文件系统和URL不友好字符，包括中文标点
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
   }
+  
+  // 最终清理：确保slug安全用于URL
+  slug = slug
+    .replace(/[<>:"\/\\|?*《》（）【】「」""''！？。，、；：]/g, '') // 再次清理所有可能的问题字符
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
   
   return slug;
 }
@@ -27,11 +34,17 @@ export function generateSlugFromText(text: string): string {
  */
 function chineseToSlug(text: string): string {
   try {
+    // 先清理标点符号再转换拼音
+    const cleanText = text.replace(/[<>:"\/\\|?*《》（）【】「」""''！？。，、；：\s]+/g, ' ').trim();
+    
     // 使用 pinyin-pro 转换中文为拼音
-    const pinyinArray = pinyin(text, { toneType: "none", type: "array" });
+    const pinyinArray = pinyin(cleanText, { toneType: "none", type: "array" });
     
     if (pinyinArray && pinyinArray.length > 0) {
-      return pinyinArray.join('-').toLowerCase();
+      return pinyinArray
+        .filter(item => item.trim() !== '') // 过滤空项
+        .join('-')
+        .toLowerCase();
     }
     
     return '';
