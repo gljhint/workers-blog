@@ -54,7 +54,6 @@ export default function PostCard({ post, isPriority = false }: PostCardProps) {
               <span>•</span>
               <Link
                 href={`/categories/${post.category.slug}`}
-                prefetch={true}
                 className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-all duration-200 hover:scale-105"
                 style={{ backgroundColor: categoryColor + '20', color: categoryColor }}
               >
@@ -71,9 +70,8 @@ export default function PostCard({ post, isPriority = false }: PostCardProps) {
         </div>
         
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-          <Link 
+          <Link
             href={`/posts/${post.slug}`}
-            prefetch={true}
             className="block"
           >
             {post.title}
@@ -91,7 +89,6 @@ export default function PostCard({ post, isPriority = false }: PostCardProps) {
             <Link
               key={tag.id}
               href={`/tags/${tag.slug}`}
-              prefetch={true}
               className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200 hover:scale-105"
             >
               {tag.name}
@@ -101,7 +98,6 @@ export default function PostCard({ post, isPriority = false }: PostCardProps) {
         
         <Link
           href={`/posts/${post.slug}`}
-          prefetch={true}
           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-all duration-200 hover:translate-x-1"
         >
           阅读更多

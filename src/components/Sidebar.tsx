@@ -24,7 +24,6 @@ export default function Sidebar({ categories, tags, totalPosts, totalViews, intr
             <div className="flex gap-4">
               <Link
                 href="/pages/about"
-                prefetch={true}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm transition-all duration-200 hover:translate-x-1"
               >
                 了解更多
@@ -44,7 +43,6 @@ export default function Sidebar({ categories, tags, totalPosts, totalViews, intr
                   <Link
                     key={category.id}
                     href={`/categories/${category.slug}`}
-                    prefetch={true}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
                   >
                     <div
@@ -72,7 +70,6 @@ export default function Sidebar({ categories, tags, totalPosts, totalViews, intr
                   <Link
                     key={tag.id}
                     href={`/tags/${tag.slug}`}
-                    prefetch={true}
                     className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105"
                   >
                     {tag.name}
