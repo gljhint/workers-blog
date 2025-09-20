@@ -81,7 +81,7 @@ async function mapPostsToMetadataBatch(posts: DBPost[]): Promise<PostMetadata[]>
 
 export async function getAllPosts(): Promise<PostMetadata[]> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<PostMetadata[]>(CacheKeys.POSTS_ALL);
       if (cached) return cached;
@@ -100,7 +100,7 @@ export async function getAllPosts(): Promise<PostMetadata[]> {
 
 export async function getPostBySlug(slug: string, incrementView = false): Promise<BlogPost | null> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<BlogPost>(CacheKeys.POST_BY_SLUG(slug));
       if (cached) {
@@ -281,7 +281,7 @@ export async function getPostsByTag(tagSlug: string): Promise<PostMetadata[]> {
 
 export async function getAllTags(): Promise<Tag[]> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Tag[]>(CacheKeys.TAGS);
       if (cached) return cached;
@@ -311,7 +311,7 @@ export async function getAllTags(): Promise<Tag[]> {
 
 export async function getAllCategories(): Promise<Category[]> {
   try {
-    const kv = getKVCache();
+  const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Category[]>(CacheKeys.CATEGORIES);
       if (cached) return cached;
@@ -367,7 +367,7 @@ export async function getPaginatedPosts(params: {
   year?: string;
   search?: string;
 }): Promise<PostsPageResult> {
-  const kv = getKVCache();
+  const kv = await getKVCache();
   const key = buildPostsQueryKey(params);
   if (kv) {
     const cached = await kv.get<PostsPageResult>(key);
@@ -535,5 +535,3 @@ export function formatDate(dateString: string): string {
     .replace(/\s+/g, '-')
     .trim();
 }
-
-

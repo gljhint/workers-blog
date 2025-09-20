@@ -7,7 +7,7 @@ import { SiteSettingsService } from '@/services/SiteSettingsService';
 import { getAllTags, getAllCategories } from '@/lib/blog';
 import { HomeStatsService } from '@/services/HomeStatsService';
 import { Suspense } from 'react';
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettingsService = SiteSettingsService.getInstance();

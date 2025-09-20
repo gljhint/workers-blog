@@ -133,9 +133,9 @@ export class KVCache {
  * 获取 KV 缓存实例
  * 兼容多种绑定名，并优先从 Cloudflare 环境 `env` 读取
  */
-export function getKVCache(): KVCache | null {
+export async function getKVCache(): Promise<KVCache | null> {
   try {
-    const { env } = getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
     const candidates = [
       'CACHE',
       'KV',

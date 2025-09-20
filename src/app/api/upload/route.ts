@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // 获取Cloudflare绑定
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
     const bucket = env.BUCKET as R2Bucket;
     const formData = await request.formData();
     const file = formData.get('file') as File;

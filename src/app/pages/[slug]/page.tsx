@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { findPageBySlug } from '@/models/PageModel';
 import { SiteSettingsService } from '@/services/SiteSettingsService';
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

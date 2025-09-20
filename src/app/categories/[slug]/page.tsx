@@ -5,15 +5,10 @@ import { getPostsByCategory, getAllCategories } from '@/lib/blog';
 import PostCard from '@/components/PostCard';
 import { generateCategoryColor } from '@/lib/colors';
 
+export const dynamic = 'force-dynamic';
+
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const categories = await getAllCategories();
-  return categories.map((category) => ({
-    slug: category.slug,
-  }));
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {

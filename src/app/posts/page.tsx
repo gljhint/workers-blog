@@ -5,6 +5,8 @@ import PostCard from '@/components/PostCard';
 import SearchAndFilter from '@/components/SearchAndFilter';
 import { SiteSettingsService } from '@/services/SiteSettingsService';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettingsService = SiteSettingsService.getInstance();
   const siteSettings = await siteSettingsService.getAllSettings();

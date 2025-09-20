@@ -21,7 +21,7 @@ export class SiteSettingsService {
   private memoryCache: Map<string, any> = new Map();
   private memoryCacheExpiry: Map<string, number> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
-  private kvCache = getKVCache();
+  // Do not hold a persistent KV instance; fetch when needed (async-safe)
 
   private constructor() {
   }
@@ -40,8 +40,9 @@ export class SiteSettingsService {
     const cacheKey = CacheKeys.SITE_SETTINGS;
     
     // 优先使用 KV 缓存
-    if (this.kvCache) {
-      const cached = await this.kvCache.get<SiteSettings>(cacheKey);
+    const kv = await getKVCache();
+    if (kv) {
+      const cached = await kv.get<SiteSettings>(cacheKey);
       if (cached) {
         return cached;
       }
@@ -84,8 +85,9 @@ export class SiteSettingsService {
     const cacheKey = `setting_${key}`;
     
     // 优先使用 KV 缓存
-    if (this.kvCache) {
-      const cached = await this.kvCache.get<T>(cacheKey);
+    const kv = await getKVCache();
+    if (kv) {
+      const cached = await kv.get<T>(cacheKey);
       if (cached !== null) {
         return cached;
       }
@@ -193,8 +195,9 @@ export class SiteSettingsService {
    */
   async clearCache(): Promise<void> {
     // 清除 KV 缓存
-    if (this.kvCache) {
-      await this.kvCache.delete(CacheKeys.SITE_SETTINGS);
+    const kv = await getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.SITE_SETTINGS);
     }
     // 清除内存缓存
     this.memoryCache.clear();
@@ -208,8 +211,9 @@ export class SiteSettingsService {
     const cacheKey = `setting_${key}`;
     
     // 清除 KV 缓存
-    if (this.kvCache) {
-      await this.kvCache.delete(cacheKey);
+    const kv = await getKVCache();
+    if (kv) {
+      await kv.delete(cacheKey);
     }
     // 清除内存缓存
     this.memoryCache.delete(cacheKey);
@@ -250,9 +254,10 @@ export class SiteSettingsService {
    */
   private async updateCache(key: string, value: any): Promise<void> {
     // 更新 KV 缓存
-    if (this.kvCache) {
+    const kv = await getKVCache();
+    if (kv) {
       // 长期缓存：不设置 TTL，更新时通过 clearSettingCache/clearCache 主动失效
-      await this.kvCache.set(key, value);
+      await kv.set(key, value);
     }
     
     // 更新内存缓存

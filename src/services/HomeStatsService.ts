@@ -10,7 +10,7 @@ export interface HomeStats {
 
 export class HomeStatsService {
   static async getStats(): Promise<HomeStats> {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<HomeStats>(CacheKeys.HOME_STATS);
       if (cached) return cached;
@@ -39,10 +39,9 @@ export class HomeStatsService {
   }
 
   static async invalidate(): Promise<void> {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.HOME_STATS);
     }
   }
 }
-

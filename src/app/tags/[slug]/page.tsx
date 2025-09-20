@@ -4,15 +4,10 @@ import Link from 'next/link';
 import { getPostsByTag, getAllTags } from '@/lib/blog';
 import PostCard from '@/components/PostCard';
 
+export const dynamic = 'force-dynamic';
+
 interface TagPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const tags = await getAllTags();
-  return tags.map((tag) => ({
-    slug: tag.slug,
-  }));
 }
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
