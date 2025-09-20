@@ -251,7 +251,8 @@ export class SiteSettingsService {
   private async updateCache(key: string, value: any): Promise<void> {
     // 更新 KV 缓存
     if (this.kvCache) {
-      await this.kvCache.set(key, value, { ttl: 300 }); // 5分钟
+      // 长期缓存：不设置 TTL，更新时通过 clearSettingCache/clearCache 主动失效
+      await this.kvCache.set(key, value);
     }
     
     // 更新内存缓存

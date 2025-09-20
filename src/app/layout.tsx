@@ -9,23 +9,7 @@ export const metadata: Metadata = {
     template: "%s",
   },
   description: '',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || ''),
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  }
 };
 
 export default function RootLayout({
@@ -38,7 +22,6 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2563eb" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>

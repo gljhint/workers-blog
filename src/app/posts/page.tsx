@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getAllPosts, getAllTags, getAllCategories } from '@/lib/blog';
+import { getPaginatedPosts, getAllTags, getAllCategories } from '@/lib/blog';
 import PostCard from '@/components/PostCard';
 import SearchAndFilter from '@/components/SearchAndFilter';
 import { SiteSettingsService } from '@/services/SiteSettingsService';
@@ -39,63 +39,21 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   const tagFilter = params.tag || '';
   const yearFilter = params.year || '';
   
-  // 获取所有数据
-  const [allPosts, tags, categories] = await Promise.all([
-    getAllPosts(),
+  // 使用缓存的分页功能获取数据
+  const [paginatedResult, tags, categories] = await Promise.all([
+    getPaginatedPosts({
+      page: currentPage,
+      perPage: postsPerPage,
+      category: categoryFilter || undefined,
+      tag: tagFilter || undefined,
+      year: yearFilter || undefined,
+      search: searchQuery || undefined
+    }),
     getAllTags(),
     getAllCategories()
   ]);
-  
-  // 筛选文章
-  let filteredPosts = allPosts.filter(post => {
-    // 搜索筛选
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      if (!post.title.toLowerCase().includes(searchLower) && 
-          !(post.description?.toLowerCase() || '').includes(searchLower)) {
-        return false;
-      }
-    }
-    
-    // 分类筛选
-    if (categoryFilter && post.category?.slug !== categoryFilter) {
-      return false;
-    }
-    
-    // 标签筛选
-    if (tagFilter && !post.tags?.some(tag => tag.slug === tagFilter)) {
-      return false;
-    }
-    
-    // 年份筛选
-    if (yearFilter) {
-      const postYear = new Date(post.created_at).getFullYear().toString();
-      if (postYear !== yearFilter) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
-  
-  // 分页计算
-  const totalPosts = filteredPosts.length;
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
-  const offset = (currentPage - 1) * postsPerPage;
-  const posts = filteredPosts.slice(offset, offset + postsPerPage);
-  
-  // 生成年份列表
-  const years = [...new Set(allPosts.map(post => 
-    new Date(post.created_at).getFullYear()
-  ))].sort((a, b) => b - a);
-  
-  // 生成归档统计
-  const archiveStats = years.map(year => ({
-    year,
-    count: allPosts.filter(post => 
-      new Date(post.created_at).getFullYear() === year
-    ).length
-  }));
+
+  const { items: posts, total: totalPosts, totalPages, years, archiveStats } = paginatedResult;
 
   // 构建查询参数
   const buildQueryString = (params: Record<string, string>) => {
@@ -219,7 +177,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
             <div className="mt-12">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  显示第 {offset + 1} 到 {Math.min(offset + postsPerPage, totalPosts)} 项，共 {totalPosts} 项
+                  显示第 {(currentPage - 1) * postsPerPage + 1} 到 {Math.min(currentPage * postsPerPage, totalPosts)} 项，共 {totalPosts} 项
                 </p>
                 <nav className="flex space-x-2">
                   {currentPage > 1 && (
@@ -288,7 +246,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 dark:text-gray-400">总文章数</span>
-                    <span className="font-bold text-blue-600 dark:text-blue-400">{allPosts.length}</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">{totalPosts}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 dark:text-gray-400">总分类数</span>
@@ -301,7 +259,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 dark:text-gray-400">总浏览量</span>
                     <span className="font-bold text-orange-600 dark:text-orange-400">
-                      {allPosts.reduce((sum, post) => sum + post.view_count, 0)}
+                      {posts.reduce((sum, post) => sum + post.view_count, 0)}
                     </span>
                   </div>
                 </div>
@@ -317,7 +275,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
                   <div className="space-y-2">
                     {categories.map((category) => {
-                      const count = allPosts.filter(post => post.category?.id === category.id).length;
+                      const count = category.post_count || 0;
                       return (
                         <Link
                           key={category.id}
@@ -386,7 +344,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
               </h3>
               <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
                 <div className="space-y-3">
-                  {allPosts
+                  {posts
                     .sort((a, b) => b.view_count - a.view_count)
                     .slice(0, 5)
                     .map((post) => (

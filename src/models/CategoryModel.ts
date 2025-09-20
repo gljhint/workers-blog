@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { categories, posts } from "@/lib/schema";
-import { eq, count, desc, and } from "drizzle-orm";
+import { eq, count, desc, and, inArray } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
 import { generateSlugFromText } from "@/lib/slugUtils";
+import { getKVCache, CacheKeys } from '@/lib/kvCache';
 
 export type Category = InferSelectModel<typeof categories>;
 
@@ -14,9 +15,19 @@ export interface CreateCategoryData {
 
 export async function getAllCategories(): Promise<Category[]> {
   try {
+    const kv = getKVCache();
+    if (kv) {
+      const cached = await kv.get<Category[]>(CacheKeys.CATEGORIES);
+      if (cached) return cached;
+    }
+
     const result = await db().select()
       .from(categories)
       .orderBy(categories.name);
+
+    if (kv) {
+      await kv.set(CacheKeys.CATEGORIES, result);
+    }
 
     return result;
   } catch (error) {
@@ -60,6 +71,19 @@ export async function findCategoryById(id: number): Promise<Category | null> {
   } catch (error) {
     console.error('根据ID查找分类失败:', error);
     return null;
+  }
+}
+
+export async function findCategoriesByIds(ids: number[]): Promise<Category[]> {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const result = await db().select()
+      .from(categories)
+      .where(inArray(categories.id, ids));
+    return result;
+  } catch (error) {
+    console.error('批量查找分类失败:', error);
+    return [];
   }
 }
 
@@ -129,7 +153,14 @@ export async function createCategory(data: CreateCategoryData): Promise<Category
       updated_at: now
     }).returning();
 
-    return result[0];
+    const created = result[0];
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.CATEGORIES);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
+    return created;
   } catch (error) {
     console.error('创建分类失败:', error);
     return null;
@@ -162,7 +193,14 @@ export async function updateCategory(id: number, data: Partial<CreateCategoryDat
       .where(eq(categories.id, id))
       .returning();
 
-    return result[0] || null;
+    const updated = result[0] || null;
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.CATEGORIES);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
+    return updated;
   } catch (error) {
     console.error('更新分类失败:', error);
     return null;
@@ -186,7 +224,12 @@ export async function deleteCategory(id: number): Promise<boolean> {
   try {
     await db().delete(categories)
       .where(eq(categories.id, id));
-
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.CATEGORIES);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
     return true;
   } catch (error) {
     console.error('删除分类失败:', error);

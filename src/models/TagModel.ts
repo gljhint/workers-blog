@@ -3,6 +3,7 @@ import { tags, posts, post_tags } from "@/lib/schema";
 import { eq, count, and } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
 import { generateSlugFromText } from "@/lib/slugUtils";
+import { getKVCache, CacheKeys } from '@/lib/kvCache';
 
 export type Tag = InferSelectModel<typeof tags>;
 
@@ -14,9 +15,19 @@ export interface CreateTagData {
 
 export async function getAllTags(): Promise<Tag[]> {
   try {
+    const kv = getKVCache();
+    if (kv) {
+      const cached = await kv.get<Tag[]>(CacheKeys.TAGS);
+      if (cached) return cached;
+    }
+
     const result = await db().select()
       .from(tags)
       .orderBy(tags.name);
+
+    if (kv) {
+      await kv.set(CacheKeys.TAGS, result);
+    }
 
     return result;
   } catch (error) {
@@ -60,7 +71,14 @@ export async function findOrCreateTagByName(name: string): Promise<Tag | null> {
       updated_at: now
     }).returning();
 
-    return result[0];
+    const created = result[0];
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.TAGS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
+    return created;
   } catch (error) {
     console.error('查找或创建标签失败:', error);
     return null;
@@ -113,7 +131,14 @@ export async function createTag(data: CreateTagData): Promise<Tag | null> {
       updated_at: now
     }).returning();
 
-    return result[0];
+    const created = result[0];
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.TAGS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
+    return created;
   } catch (error) {
     console.error('创建标签失败:', error);
     return null;
@@ -151,7 +176,14 @@ export async function updateTag(id: number, data: Partial<CreateTagData>): Promi
       .where(eq(tags.id, id))
       .returning();
 
-    return result[0] || null;
+    const updated = result[0] || null;
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.TAGS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
+    return updated;
   } catch (error) {
     console.error('更新标签失败:', error);
     return null;
@@ -162,7 +194,12 @@ export async function deleteTag(id: number): Promise<boolean> {
   try {
     await db().delete(tags)
       .where(eq(tags.id, id));
-
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.TAGS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+    }
     return true;
   } catch (error) {
     console.error('删除标签失败:', error);

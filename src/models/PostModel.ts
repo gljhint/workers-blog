@@ -3,6 +3,7 @@ import { posts, categories, tags, post_tags } from "@/lib/schema";
 import { eq, and, desc, count, like, sql } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
 import { generateSlugFromText } from "@/lib/slugUtils";
+import { getKVCache, CacheKeys } from '@/lib/kvCache';
 
 export type Post = InferSelectModel<typeof posts>;
 
@@ -62,12 +63,24 @@ export async function getPublishedPosts(): Promise<Post[]> {
 
 export async function findPostBySlug(slug: string): Promise<Post | null> {
   try {
+    const kv = getKVCache();
+    if (kv) {
+      const cached = await kv.get<Post>(CacheKeys.POST_BY_SLUG(slug));
+      if (cached) return cached;
+    }
+
     const result = await db().select()
       .from(posts)
       .where(eq(posts.slug, slug))
       .limit(1);
 
-    return result[0] || null;
+    const post = result[0] || null;
+
+    if (kv && post) {
+      await kv.set(CacheKeys.POST_BY_SLUG(slug), post);
+    }
+
+    return post;
   } catch (error) {
     console.error('根据slug获取文章失败:', error);
     return null;
@@ -76,12 +89,24 @@ export async function findPostBySlug(slug: string): Promise<Post | null> {
 
 export async function findPostById(id: number): Promise<Post | null> {
   try {
+    const kv = getKVCache();
+    if (kv) {
+      const cached = await kv.get<Post>(CacheKeys.POST(id));
+      if (cached) return cached;
+    }
+
     const result = await db().select()
       .from(posts)
       .where(eq(posts.id, id))
       .limit(1);
 
-    return result[0] || null;
+    const post = result[0] || null;
+
+    if (kv && post) {
+      await kv.set(CacheKeys.POST(id), post);
+    }
+
+    return post;
   } catch (error) {
     console.error('根据ID获取文章失败:', error);
     return null;
@@ -103,7 +128,16 @@ export async function createPost(data: CreatePostData): Promise<Post | null> {
       updated_at: now
     }).returning();
 
-    return result[0];
+    const created = result[0];
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.HOME_STATS);
+      await kv.clearByPrefix('posts:list:'); // 清理所有列表缓存
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('post:slug:');
+      await kv.clearByPrefix('post:');
+    }
+    return created;
   } catch (error) {
     console.error('创建文章失败:', error);
     return null;
@@ -130,7 +164,16 @@ export async function updatePost(id: number, data: UpdatePostData): Promise<Post
       .where(eq(posts.id, id))
       .returning();
 
-    return result[0] || null;
+    const updated = result[0] || null;
+    const kv = getKVCache();
+    if (kv && updated) {
+      await kv.delete(CacheKeys.HOME_STATS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+      await kv.delete(CacheKeys.POST(updated.id));
+      await kv.delete(CacheKeys.POST_BY_SLUG(updated.slug));
+    }
+    return updated;
   } catch (error) {
     console.error('更新文章失败:', error);
     return null;
@@ -139,9 +182,22 @@ export async function updatePost(id: number, data: UpdatePostData): Promise<Post
 
 export async function deletePost(id: number): Promise<boolean> {
   try {
+    // 获取要删除的文章信息用于缓存清理
+    const postToDelete = await findPostById(id);
+
     await db().delete(posts)
       .where(eq(posts.id, id));
 
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.HOME_STATS);
+      await kv.delete(CacheKeys.POSTS_ALL);
+      await kv.clearByPrefix('posts:list:');
+      await kv.delete(CacheKeys.POST(id));
+      if (postToDelete) {
+        await kv.delete(CacheKeys.POST_BY_SLUG(postToDelete.slug));
+      }
+    }
     return true;
   } catch (error) {
     console.error('删除文章失败:', error);
@@ -209,6 +265,13 @@ export async function incrementPostViewCount(slug: string): Promise<boolean> {
       })
       .where(eq(posts.slug, slug));
     
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.HOME_STATS);
+      // 更新文章缓存中的浏览量
+      await kv.delete(CacheKeys.POST(currentPost.id));
+      await kv.delete(CacheKeys.POST_BY_SLUG(slug));
+    }
     return true;
   } catch (error) {
     console.error('增加文章浏览量失败:', error);

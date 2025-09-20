@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { post_tags } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 export async function addTagsToPost(postId: number, tagIds: number[]): Promise<boolean> {
   try {
@@ -68,6 +68,24 @@ export async function getPostIdsByTagId(tagId: number): Promise<number[]> {
   } catch (error) {
     console.error('获取标签文章ID失败:', error);
     return [];
+  }
+}
+
+export async function getTagIdsByPostIds(postIds: number[]): Promise<Record<number, number[]>> {
+  const map: Record<number, number[]> = {};
+  if (!postIds || postIds.length === 0) return map;
+  try {
+    const rows = await db().select({ post_id: post_tags.post_id, tag_id: post_tags.tag_id })
+      .from(post_tags)
+      .where(inArray(post_tags.post_id, postIds));
+    for (const row of rows) {
+      if (!map[row.post_id]) map[row.post_id] = [];
+      map[row.post_id].push(row.tag_id);
+    }
+    return map;
+  } catch (error) {
+    console.error('批量获取文章标签ID失败:', error);
+    return map;
   }
 }
 

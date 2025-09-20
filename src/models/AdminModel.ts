@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { admins } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import bcrypt from 'bcryptjs';
 import type { InferSelectModel } from 'drizzle-orm';
 
@@ -85,6 +85,19 @@ export async function createAdmin(data: CreateAdminData): Promise<Admin | null> 
   } catch (error) {
     console.error('创建管理员失败:', error);
     return null;
+  }
+}
+
+export async function findAdminsByIds(ids: number[]): Promise<Admin[]> {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const result = await db().select()
+      .from(admins)
+      .where(inArray(admins.id, ids));
+    return result;
+  } catch (error) {
+    console.error('批量查找管理员失败:', error);
+    return [];
   }
 }
 

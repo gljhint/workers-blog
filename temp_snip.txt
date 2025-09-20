@@ -1,0 +1,81 @@
+export async function getAllPosts(): Promise<PostMetadata[]> {
+  try {
+    const posts = await getPublishedPosts();
+    const result = [];
+    
+    for (const post of posts) {
+      // 获取文章的标�?      const tagIds = await getTagIdsByPostId(post.id);
+      const tags: Tag[] = [];
+      
+      if (tagIds.length > 0) {
+        const allTags = await getAllTags();
+        tagIds.forEach(tagId => {
+          const tag = allTags.find(t => t.id === tagId);
+          if (tag) {
+            tags.push(tag);
+          }
+        });
+      }
+
+      // 获取作者信�?      let author: Admin | undefined = undefined;
+      if (post.author_id) {
+        const authorData = await findAdminById(post.author_id);
+        author = authorData ? {
+          ...authorData,
+          display_name: authorData.display_name || undefined,
+          bio: authorData.bio || undefined,
+          avatar: authorData.avatar || undefined,
+          created_at: authorData.created_at || '',
+          updated_at: authorData.updated_at || '',
+          is_active: Boolean(authorData.is_active),
+          last_login: authorData.last_login || undefined
+        } : undefined;
+      }
+
+      // 获取分类信息
+      let category: Category | undefined = undefined;
+      if (post.category_id) {
+        const categoryData = await findCategoryById(post.category_id);
+        category = categoryData ? {
+          ...categoryData,
+          description: categoryData.description || undefined,
+          created_at: categoryData.created_at || '',
+          updated_at: categoryData.updated_at || '',
+          post_count: categoryData.post_count || 0
+        } : undefined;
+      }
+
+      result.push({
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        description: post.description || '',
+        is_published: Boolean(post.is_published),
+        is_featured: Boolean(post.is_featured),
+        view_count: post.view_count || 0,
+        like_count: post.like_count || 0,
+        comment_count: post.comment_count || 0,
+        cover_image: post.cover_image || '',
+        category_id: post.category_id || undefined,
+        author_id: post.author_id || undefined,
+        published_at: post.published_at || '',
+        allow_comments: Boolean(post.allow_comments),
+        created_at: post.created_at || '',
+        updated_at: post.updated_at || '',
+        tags,
+        author,
+        category
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
+}
+
+export async function getPostBySlug(slug: string, incrementView = false): Promise<BlogPost | null> {
+  try {
+    const post = await findPostBySlug(slug);
+    

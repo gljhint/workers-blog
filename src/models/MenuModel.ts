@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { menus } from "@/lib/schema";
 import { eq, asc } from "drizzle-orm";
 import type { InferSelectModel } from 'drizzle-orm';
+import { getKVCache, CacheKeys } from '@/lib/kvCache';
 
 export type Menu = InferSelectModel<typeof menus>;
 
@@ -32,10 +33,20 @@ export async function getAllMenus(): Promise<Menu[]> {
 
 export async function getActiveMenus(): Promise<Menu[]> {
   try {
+    const kv = getKVCache();
+    if (kv) {
+      const cached = await kv.get<Menu[]>(CacheKeys.MENUS);
+      if (cached) return cached;
+    }
+
     const result = await db().select()
       .from(menus)
       .where(eq(menus.is_active, true))
       .orderBy(asc(menus.menu_order));
+
+    if (kv) {
+      await kv.set(CacheKeys.MENUS, result);
+    }
 
     return result;
   } catch (error) {
@@ -71,7 +82,12 @@ export async function createMenu(data: CreateMenuData): Promise<Menu | null> {
       updated_at: now
     }).returning();
 
-    return (result as Menu[])[0] || null;
+    const created = (result as Menu[])[0] || null;
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.MENUS);
+    }
+    return created;
   } catch (error) {
     console.error('创建菜单失败:', error);
     return null;
@@ -90,7 +106,12 @@ export async function updateMenu(id: number, data: Partial<CreateMenuData>): Pro
       .where(eq(menus.id, id))
       .returning();
 
-    return (result as Menu[])[0] || null;
+    const updated = (result as Menu[])[0] || null;
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.MENUS);
+    }
+    return updated;
   } catch (error) {
     console.error('更新菜单失败:', error);
     return null;
@@ -101,7 +122,10 @@ export async function deleteMenu(id: number): Promise<boolean> {
   try {
     await db().delete(menus)
       .where(eq(menus.id, id));
-
+    const kv = getKVCache();
+    if (kv) {
+      await kv.delete(CacheKeys.MENUS);
+    }
     return true;
   } catch (error) {
     console.error('删除菜单失败:', error);

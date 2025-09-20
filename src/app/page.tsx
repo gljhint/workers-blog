@@ -5,7 +5,9 @@ import PostCard from '@/components/PostCard';
 import Sidebar from '@/components/Sidebar';
 import { SiteSettingsService } from '@/services/SiteSettingsService';
 import { getAllTags, getAllCategories } from '@/lib/blog';
+import { HomeStatsService } from '@/services/HomeStatsService';
 import { Suspense } from 'react';
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettingsService = SiteSettingsService.getInstance();
@@ -28,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function SidebarWrapper() {
+function SidebarWrapper({ tags, categories }: { tags: any[], categories: any[] }) {
   return (
     <Suspense fallback={
       <div className="lg:col-span-1">
@@ -43,26 +45,20 @@ function SidebarWrapper() {
         </div>
       </div>
     }>
-      <SidebarData />
+      <SidebarData tags={tags} categories={categories} />
     </Suspense>
   );
 }
 
-async function SidebarData() {
-  const [tags, categories] = await Promise.all([
-    getAllTags(),
-    getAllCategories()
-  ]);
-
+async function SidebarData({ tags, categories }: { tags: any[], categories: any[] }) {
   const siteSettings = await SiteSettingsService.getInstance().getAllSettings();
-  const posts = await getAllPosts();
-  const totalViews = posts.reduce((sum, post) => sum + post.view_count, 0);
+  const { totalPosts, totalViews } = await HomeStatsService.getStats();
 
   return (
     <Sidebar
       categories={categories}
       tags={tags}
-      totalPosts={posts.length}
+      totalPosts={totalPosts}
       totalViews={totalViews}
       introduction={siteSettings.introduction}
     />
@@ -70,10 +66,12 @@ async function SidebarData() {
 }
 
 export default async function Home() {
-  // 只等待关键数据
-  const [siteSettings, posts] = await Promise.all([
+  // 一次性获取所有需要的数据
+  const [siteSettings, posts, tags, categories] = await Promise.all([
     SiteSettingsService.getInstance().getAllSettings(),
-    getAllPosts()
+    getAllPosts(),
+    getAllTags(),
+    getAllCategories()
   ]);
 
   // 首页显示的文章数量使用设置的一半，至少3篇
@@ -122,7 +120,7 @@ export default async function Home() {
             </section>
           </main>
 
-          <SidebarWrapper />
+          <SidebarWrapper tags={tags} categories={categories} />
         </div>
       </div>
   );
