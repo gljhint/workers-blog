@@ -15,7 +15,7 @@ export interface CreateCategoryData {
 
 export async function getAllCategories(): Promise<Category[]> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Category[]>(CacheKeys.CATEGORIES);
       if (cached) return cached;
@@ -154,7 +154,7 @@ export async function createCategory(data: CreateCategoryData): Promise<Category
     }).returning();
 
     const created = result[0];
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.CATEGORIES);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -194,7 +194,7 @@ export async function updateCategory(id: number, data: Partial<CreateCategoryDat
       .returning();
 
     const updated = result[0] || null;
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.CATEGORIES);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -224,7 +224,7 @@ export async function deleteCategory(id: number): Promise<boolean> {
   try {
     await db().delete(categories)
       .where(eq(categories.id, id));
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.CATEGORIES);
       await kv.delete(CacheKeys.POSTS_ALL);

@@ -15,7 +15,7 @@ export interface CreateTagData {
 
 export async function getAllTags(): Promise<Tag[]> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Tag[]>(CacheKeys.TAGS);
       if (cached) return cached;
@@ -72,7 +72,7 @@ export async function findOrCreateTagByName(name: string): Promise<Tag | null> {
     }).returning();
 
     const created = result[0];
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.TAGS);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -132,7 +132,7 @@ export async function createTag(data: CreateTagData): Promise<Tag | null> {
     }).returning();
 
     const created = result[0];
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.TAGS);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -177,7 +177,7 @@ export async function updateTag(id: number, data: Partial<CreateTagData>): Promi
       .returning();
 
     const updated = result[0] || null;
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.TAGS);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -194,7 +194,7 @@ export async function deleteTag(id: number): Promise<boolean> {
   try {
     await db().delete(tags)
       .where(eq(tags.id, id));
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.TAGS);
       await kv.delete(CacheKeys.POSTS_ALL);

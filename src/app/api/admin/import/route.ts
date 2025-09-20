@@ -66,11 +66,13 @@ export async function POST(request: NextRequest) {
           const now = new Date().toISOString();
           
           // 检查是否已存在
-          const existing = await db().select().from(categories).where(eq(categories.slug, category.slug)).limit(1);
+          const dbInstance = await db();
+          const existing = await dbInstance.select().from(categories).where(eq(categories.slug, category.slug)).limit(1);
 
           if (existing.length > 0) {
             if (overwrite) {
-              await db().update(categories)
+              const dbInstance1 = await db();
+              await dbInstance1.update(categories)
                 .set({
                   name: category.name,
                   description: category.description || null,
@@ -82,7 +84,8 @@ export async function POST(request: NextRequest) {
               importResults.categories.skipped++;
             }
           } else {
-            await db().insert(categories).values({
+            const dbInstance2 = await db();
+            await dbInstance2.insert(categories).values({
               name: category.name,
               slug: category.slug,
               description: category.description || null,
@@ -106,11 +109,13 @@ export async function POST(request: NextRequest) {
           const now = new Date().toISOString();
           
           // 检查是否已存在
-          const existing = await db().select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
+          const dbInstance3 = await db();
+          const existing = await dbInstance3.select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
 
           if (existing.length > 0) {
             if (overwrite) {
-              await db().update(tags)
+              const dbInstance4 = await db();
+              await dbInstance4.update(tags)
                 .set({
                   name: tag.name,
                   updated_at: now
@@ -121,7 +126,8 @@ export async function POST(request: NextRequest) {
               importResults.tags.skipped++;
             }
           } else {
-            await db().insert(tags).values({
+            const dbInstance5 = await db();
+            await dbInstance5.insert(tags).values({
               name: tag.name,
               slug: tag.slug,
               post_count: 0,
@@ -144,11 +150,13 @@ export async function POST(request: NextRequest) {
           const now = new Date().toISOString();
           
           // 检查是否已存在
-          const existing = await db().select().from(pages).where(eq(pages.slug, page.slug)).limit(1);
+          const dbInstance6 = await db();
+          const existing = await dbInstance6.select().from(pages).where(eq(pages.slug, page.slug)).limit(1);
 
           if (existing.length > 0) {
             if (overwrite) {
-              await db().update(pages)
+              const dbInstance7 = await db();
+              await dbInstance7.update(pages)
                 .set({
                   title: page.title,
                   content: page.content,
@@ -161,7 +169,8 @@ export async function POST(request: NextRequest) {
               importResults.pages.skipped++;
             }
           } else {
-            await db().insert(pages).values({
+            const dbInstance8 = await db();
+            await dbInstance8.insert(pages).values({
               slug: page.slug,
               title: page.title,
               content: page.content,
@@ -185,11 +194,13 @@ export async function POST(request: NextRequest) {
           const now = new Date().toISOString();
           
           // 检查是否已存在
-          const existing = await db().select().from(posts).where(eq(posts.slug, post.slug)).limit(1);
+          const dbInstance9 = await db();
+          const existing = await dbInstance9.select().from(posts).where(eq(posts.slug, post.slug)).limit(1);
 
           let categoryId = null;
           if (post.category_slug) {
-            const categoryResult = await db().select().from(categories).where(eq(categories.slug, post.category_slug)).limit(1);
+            const dbInstance10 = await db();
+            const categoryResult = await dbInstance10.select().from(categories).where(eq(categories.slug, post.category_slug)).limit(1);
             if (categoryResult.length > 0) {
               categoryId = categoryResult[0].id;
             }
@@ -199,7 +210,8 @@ export async function POST(request: NextRequest) {
             if (overwrite) {
               const postId = existing[0].id;
               
-              await db().update(posts)
+              const dbInstance11 = await db();
+              await dbInstance11.update(posts)
                 .set({
                   title: post.title,
                   description: post.description,
@@ -211,12 +223,15 @@ export async function POST(request: NextRequest) {
                 .where(eq(posts.slug, post.slug));
 
               // 更新标签关联
-              await db().delete(post_tags).where(eq(post_tags.post_id, postId));
+              const dbInstance12 = await db();
+              await dbInstance12.delete(post_tags).where(eq(post_tags.post_id, postId));
               if (post.tags && post.tags.length > 0) {
                 for (const tag of post.tags) {
-                  const tagResult = await db().select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
+                  const dbInstance13 = await db();
+                  const tagResult = await dbInstance13.select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
                   if (tagResult.length > 0) {
-                    await db().insert(post_tags).values({
+                    const dbInstance14 = await db();
+                    await dbInstance14.insert(post_tags).values({
                       post_id: postId,
                       tag_id: tagResult[0].id,
                       created_at: now
@@ -230,7 +245,8 @@ export async function POST(request: NextRequest) {
               importResults.posts.skipped++;
             }
           } else {
-            const insertedPost = await db().insert(posts).values({
+            const dbInstance15 = await db();
+            const insertedPost = await dbInstance15.insert(posts).values({
               slug: post.slug,
               title: post.title,
               description: post.description,
@@ -252,9 +268,11 @@ export async function POST(request: NextRequest) {
               // 添加标签关联
               if (post.tags && post.tags.length > 0) {
                 for (const tag of post.tags) {
-                  const tagResult = await db().select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
+                  const dbInstance16 = await db();
+                  const tagResult = await dbInstance16.select().from(tags).where(eq(tags.slug, tag.slug)).limit(1);
                   if (tagResult.length > 0) {
-                    await db().insert(post_tags).values({
+                    const dbInstance17 = await db();
+                    await dbInstance17.insert(post_tags).values({
                       post_id: postId,
                       tag_id: tagResult[0].id,
                       created_at: now
@@ -280,11 +298,13 @@ export async function POST(request: NextRequest) {
           const now = new Date().toISOString();
           
           // 检查是否已存在（使用title作为唯一标识）
-          const existing = await db().select().from(menus).where(eq(menus.title, menu.title || menu.name)).limit(1);
+          const dbInstance18 = await db();
+          const existing = await dbInstance18.select().from(menus).where(eq(menus.title, menu.title || menu.name)).limit(1);
 
           if (existing.length > 0) {
             if (overwrite) {
-              await db().update(menus)
+              const dbInstance19 = await db();
+              await dbInstance19.update(menus)
                 .set({
                   title: menu.title || menu.name,
                   url: menu.url,
@@ -301,7 +321,8 @@ export async function POST(request: NextRequest) {
               importResults.menus.skipped++;
             }
           } else {
-            await db().insert(menus).values({
+            const dbInstance20 = await db();
+            await dbInstance20.insert(menus).values({
               title: menu.title || menu.name,
               url: menu.url,
               icon: menu.icon || null,
@@ -327,11 +348,13 @@ export async function POST(request: NextRequest) {
     if (importSettings && data.site_settings) {
       try {
         // 检查是否已存在站点设置记录
-        const existing = await db().select().from(site_settings).limit(1);
+        const dbInstance21 = await db();
+        const existing = await dbInstance21.select().from(site_settings).limit(1);
 
         if (existing.length > 0) {
           if (overwrite) {
-            await db().update(site_settings)
+            const dbInstance22 = await db();
+            await dbInstance22.update(site_settings)
               .set({
                 site_name: data.site_settings.site_name || null,
                 site_title: data.site_settings.site_title || null,
@@ -348,7 +371,8 @@ export async function POST(request: NextRequest) {
             importResults.settings.skipped++;
           }
         } else {
-          await db().insert(site_settings).values({
+          const dbInstance23 = await db();
+          await dbInstance23.insert(site_settings).values({
             site_name: data.site_settings.site_name || null,
             site_title: data.site_settings.site_title || null,
             site_description: data.site_settings.site_description || null,

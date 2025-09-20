@@ -33,7 +33,7 @@ export async function getAllMenus(): Promise<Menu[]> {
 
 export async function getActiveMenus(): Promise<Menu[]> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Menu[]>(CacheKeys.MENUS);
       if (cached) return cached;
@@ -83,7 +83,7 @@ export async function createMenu(data: CreateMenuData): Promise<Menu | null> {
     }).returning();
 
     const created = (result as Menu[])[0] || null;
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.MENUS);
     }
@@ -107,7 +107,7 @@ export async function updateMenu(id: number, data: Partial<CreateMenuData>): Pro
       .returning();
 
     const updated = (result as Menu[])[0] || null;
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.MENUS);
     }
@@ -122,7 +122,7 @@ export async function deleteMenu(id: number): Promise<boolean> {
   try {
     await db().delete(menus)
       .where(eq(menus.id, id));
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.MENUS);
     }

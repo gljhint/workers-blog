@@ -63,7 +63,7 @@ export async function getPublishedPosts(): Promise<Post[]> {
 
 export async function findPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Post>(CacheKeys.POST_BY_SLUG(slug));
       if (cached) return cached;
@@ -89,7 +89,7 @@ export async function findPostBySlug(slug: string): Promise<Post | null> {
 
 export async function findPostById(id: number): Promise<Post | null> {
   try {
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       const cached = await kv.get<Post>(CacheKeys.POST(id));
       if (cached) return cached;
@@ -129,7 +129,7 @@ export async function createPost(data: CreatePostData): Promise<Post | null> {
     }).returning();
 
     const created = result[0];
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.HOME_STATS);
       await kv.clearByPrefix('posts:list:'); // 清理所有列表缓存
@@ -165,7 +165,7 @@ export async function updatePost(id: number, data: UpdatePostData): Promise<Post
       .returning();
 
     const updated = result[0] || null;
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv && updated) {
       await kv.delete(CacheKeys.HOME_STATS);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -188,7 +188,7 @@ export async function deletePost(id: number): Promise<boolean> {
     await db().delete(posts)
       .where(eq(posts.id, id));
 
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.HOME_STATS);
       await kv.delete(CacheKeys.POSTS_ALL);
@@ -207,12 +207,12 @@ export async function deletePost(id: number): Promise<boolean> {
 
 export async function postSlugExists(slug: string, excludeId?: number): Promise<boolean> {
   try {
-    let query = db().select({ count: count() })
+    let query = (await db()).select({ count: count() })
       .from(posts)
       .where(eq(posts.slug, slug));
-    
+
     if (excludeId) {
-      query = db().select({ count: count() })
+      query = (await db()).select({ count: count() })
         .from(posts)
         .where(and(eq(posts.slug, slug), eq(posts.id, excludeId)));
     }
@@ -265,7 +265,7 @@ export async function incrementPostViewCount(slug: string): Promise<boolean> {
       })
       .where(eq(posts.slug, slug));
     
-    const kv = getKVCache();
+    const kv = await getKVCache();
     if (kv) {
       await kv.delete(CacheKeys.HOME_STATS);
       // 更新文章缓存中的浏览量
